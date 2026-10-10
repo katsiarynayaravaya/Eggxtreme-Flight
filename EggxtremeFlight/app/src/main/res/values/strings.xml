@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Eggxtreme Flight</string>
+    <string name="game_title">Eggxtreme Flight</string>
+    <string name="single_play_btn_name">Single Play</string>
+    <string name="shadowboxing_play_btn_name">Shadowboxing</string>
+    <string name="shop_btn_name">Shop</string>
+    <string name="leaders_btn_name">Leaders</string>
+    <string name="settings_btn_name">Settings</string>
 </resources>
