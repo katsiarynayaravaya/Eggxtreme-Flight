@@ -7,6 +7,42 @@
 
     <fragment android:id="@+id/fragment_main_menu"
         android:name="com.example.eggxtremeflight.MainMenuFragment"
-        tools:layout="@layout/fragment_main_menu"/>
+        tools:layout="@layout/fragment_main_menu">
+        <action
+            android:id="@+id/action_fragment_main_menu_to_fragment_single_play"
+            app:destination="@id/fragment_single_play" />
+        <action
+            android:id="@+id/action_fragment_main_menu_to_fragment_shadowboxing"
+            app:destination="@id/fragment_shadowboxing" />
+        <action
+            android:id="@+id/action_fragment_main_menu_to_fragment_shop"
+            app:destination="@id/fragment_shop" />
+        <action
+            android:id="@+id/action_fragment_main_menu_to_fragment_leaders"
+            app:destination="@id/fragment_leaders" />
+        <action
+            android:id="@+id/action_fragment_main_menu_to_fragment_settings"
+            app:destination="@id/fragment_settings" />
+    </fragment>
+
+    <fragment android:id="@+id/fragment_single_play"
+        android:name="com.example.eggxtremeflight.SinglePlayFragment"
+        tools:layout="@layout/fragment_single_play"/>
+
+    <fragment android:id="@+id/fragment_shadowboxing"
+        android:name="com.example.eggxtremeflight.ShadowboxingFragment"
+        tools:layout="@layout/fragment_shadowboxing"/>
+
+    <fragment android:id="@+id/fragment_shop"
+        android:name="com.example.eggxtremeflight.ShopFragment"
+        tools:layout="@layout/fragment_shop"/>
+
+    <fragment android:id="@+id/fragment_leaders"
+        android:name="com.example.eggxtremeflight.LeadersFragment"
+        tools:layout="@layout/fragment_leaders"/>
+
+    <fragment android:id="@+id/fragment_settings"
+        android:name="com.example.eggxtremeflight.SettingsFragment"
+        tools:layout="@layout/fragment_settings"/>
 
 </navigation>
