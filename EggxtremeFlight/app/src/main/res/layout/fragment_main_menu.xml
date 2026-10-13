@@ -17,7 +17,9 @@
         android:fontFamily="@font/game_font"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/single_play_button"
+        app:layout_constraintHorizontal_bias="0.5"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/single_play_button"
@@ -27,36 +29,38 @@
         android:background="@drawable/button_background"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:layout_constraintBottom_toTopOf="@+id/shadow_play_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/title">
 
         <ImageView
             android:id="@+id/chicken_icon"
             android:layout_width="55dp"
             android:layout_height="55dp"
+            android:contentDescription="@null"
             android:src="@drawable/chicken_icon"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_text_single_play"
             app:layout_constraintHorizontal_chainStyle="packed"
-            android:contentDescription="@null"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/btn_text_single_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/single_play_btn_name"
-            android:textStyle="bold"
-            android:fontFamily="@font/game_font"
-            android:textSize="30sp"
-            android:textColor="#0f0002"
             android:layout_marginStart="12dp"
-            app:layout_constraintStart_toEndOf="@+id/chicken_icon"
+            android:fontFamily="@font/game_font"
+            android:text="@string/single_play_btn_name"
+            android:textColor="#0f0002"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/chicken_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -69,36 +73,38 @@
         android:background="@drawable/button_background"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@+id/single_play_button"
+        app:layout_constraintBottom_toTopOf="@+id/shop_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/single_play_button">
 
         <ImageView
             android:id="@+id/shadow_chicken_icon"
             android:layout_width="55dp"
             android:layout_height="55dp"
+            android:contentDescription="@null"
             android:src="@drawable/shadow_chicken_icon"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_text_shadow_play"
             app:layout_constraintHorizontal_chainStyle="packed"
-            android:contentDescription="@null"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/btn_text_shadow_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/shadowboxing_play_btn_name"
-            android:textStyle="bold"
-            android:fontFamily="@font/game_font"
-            android:textSize="30sp"
-            android:textColor="#0f0002"
             android:layout_marginStart="12dp"
-            app:layout_constraintStart_toEndOf="@+id/shadow_chicken_icon"
+            android:fontFamily="@font/game_font"
+            android:text="@string/shadowboxing_play_btn_name"
+            android:textColor="#0f0002"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/shadow_chicken_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -111,36 +117,38 @@
         android:background="@drawable/button_background"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@+id/shadow_play_button"
+        app:layout_constraintBottom_toTopOf="@+id/leaders_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/shadow_play_button">
 
         <ImageView
             android:id="@+id/shop_icon"
             android:layout_width="55dp"
             android:layout_height="55dp"
+            android:contentDescription="@null"
             android:src="@drawable/shop_icon"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_text_shop"
             app:layout_constraintHorizontal_chainStyle="packed"
-            android:contentDescription="@null"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/btn_text_shop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/shop_btn_name"
-            android:textStyle="bold"
-            android:fontFamily="@font/game_font"
-            android:textSize="30sp"
-            android:textColor="#0f0002"
             android:layout_marginStart="12dp"
-            app:layout_constraintStart_toEndOf="@+id/shop_icon"
+            android:fontFamily="@font/game_font"
+            android:text="@string/shop_btn_name"
+            android:textColor="#0f0002"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/shop_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -153,36 +161,38 @@
         android:background="@drawable/button_background"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@+id/shop_button"
+        app:layout_constraintBottom_toTopOf="@+id/settings_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/shop_button">
 
         <ImageView
             android:id="@+id/leaders_icon"
             android:layout_width="55dp"
             android:layout_height="55dp"
+            android:contentDescription="@null"
             android:src="@drawable/leaders_icon"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_text_leaders"
             app:layout_constraintHorizontal_chainStyle="packed"
-            android:contentDescription="@null"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/btn_text_leaders"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/leaders_btn_name"
-            android:textStyle="bold"
-            android:fontFamily="@font/game_font"
-            android:textSize="30sp"
-            android:textColor="#0f0002"
             android:layout_marginStart="12dp"
-            app:layout_constraintStart_toEndOf="@+id/leaders_icon"
+            android:fontFamily="@font/game_font"
+            android:text="@string/leaders_btn_name"
+            android:textColor="#0f0002"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/leaders_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -192,39 +202,42 @@
         android:layout_width="300dp"
         android:layout_height="60dp"
         android:layout_marginTop="30dp"
+        android:layout_marginBottom="200dp"
         android:background="@drawable/button_background"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@+id/leaders_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/leaders_button">
 
         <ImageView
             android:id="@+id/settings_icon"
             android:layout_width="55dp"
             android:layout_height="55dp"
+            android:contentDescription="@null"
             android:src="@drawable/settings_icon"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_text_settings"
             app:layout_constraintHorizontal_chainStyle="packed"
-            android:contentDescription="@null"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/btn_text_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/settings_btn_name"
-            android:textStyle="bold"
-            android:fontFamily="@font/game_font"
-            android:textSize="30sp"
-            android:textColor="#0f0002"
             android:layout_marginStart="12dp"
-            app:layout_constraintStart_toEndOf="@+id/settings_icon"
+            android:fontFamily="@font/game_font"
+            android:text="@string/settings_btn_name"
+            android:textColor="#0f0002"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/settings_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
