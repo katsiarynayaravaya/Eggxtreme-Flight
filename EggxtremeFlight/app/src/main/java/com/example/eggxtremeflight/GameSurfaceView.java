@@ -1,6 +1,7 @@
 package com.example.eggxtremeflight;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,6 +13,14 @@ import androidx.annotation.NonNull;
 
 public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     private Bitmap gameMap;
+    private Bitmap skinUp;
+    private Bitmap skinMid;
+    private Bitmap skinDown;
+    private float birdX;
+    private float birdY;
+    private Bitmap currentSkinFrame;
+    private int animationTick = 0;
+    private int currentFrameIndex = 0;
     private final SurfaceHolder holder;
     private float backgroundX1 = 0f;
     private float backgroundX2 = 0f;
@@ -29,7 +38,26 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     @Override
     public void run() {
         while (isRunning) {
+            animationTick++;
+            if (animationTick >= 6) {
+                animationTick = 0;
+                currentFrameIndex = (currentFrameIndex + 1) % 4;
 
+                switch (currentFrameIndex) {
+                    case 0:
+                        currentSkinFrame = skinMid;
+                        break;
+                    case 1:
+                        currentSkinFrame = skinUp;
+                        break;
+                    case 2:
+                        currentSkinFrame = skinMid;
+                        break;
+                    case 3:
+                        currentSkinFrame = skinDown;
+                        break;
+                }
+            }
             backgroundX1 -= SPEED;
             backgroundX2 = backgroundX1 + mapWidth;
 
@@ -44,6 +72,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
                     canvas.drawARGB(255, 0, 0, 0);
                     canvas.drawBitmap(gameMap, backgroundX1, 0f, null);
                     canvas.drawBitmap(gameMap, backgroundX2, 0f, null);
+                    canvas.drawBitmap(currentSkinFrame, birdX, birdY, null);
                     holder.unlockCanvasAndPost(canvas);
                 }
             }
@@ -79,7 +108,45 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             scaledBitmap.recycle();
             mapWidth = gameMap.getWidth();
             backgroundX2 = mapWidth;
+
+            birdX = getWidth() / 4f;
+            birdY = getHeight() / 2f;
         }
+        if (skinMid == null) {
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences("GameSharedPreferences", Context.MODE_PRIVATE);
+            String activeSkin = sharedPreferences.getString("selected_skin", "skin1");
+
+            int resUp, resMid, resDown;
+
+            if (activeSkin.equals("skin2")) {
+                resUp = R.drawable.skin2_egg_up;
+                resMid = R.drawable.skin2_egg_mid;
+                resDown = R.drawable.skin2_egg_down;
+            } else if (activeSkin.equals("skin3")) {
+                resUp = R.drawable.skin3_nagget_up;
+                resMid = R.drawable.skin3_nagget_mid;
+                resDown = R.drawable.skin3_nagget_down;
+            } else {
+                resUp = R.drawable.skin1_chicken_up;
+                resMid = R.drawable.skin1_chicken_mid;
+                resDown = R.drawable.skin1_chicken_down;
+            }
+
+            Bitmap rawUp = BitmapFactory.decodeResource(getResources(), resUp);
+            Bitmap rawMid = BitmapFactory.decodeResource(getResources(), resMid);
+            Bitmap rawDown = BitmapFactory.decodeResource(getResources(), resDown);
+
+            int birdSize = getHeight() / 12;
+
+            skinUp = Bitmap.createScaledBitmap(rawUp, birdSize, birdSize, true);
+            skinMid = Bitmap.createScaledBitmap(rawMid, birdSize, birdSize, true);
+            skinDown = Bitmap.createScaledBitmap(rawDown, birdSize, birdSize, true);
+
+            rawUp.recycle();
+            rawMid.recycle();
+            rawDown.recycle();
+        }
+        currentSkinFrame = skinMid;
         isRunning = true;
         thread = new Thread(this);
         thread.start();
