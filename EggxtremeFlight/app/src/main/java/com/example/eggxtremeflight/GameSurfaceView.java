@@ -1,6 +1,8 @@
 package com.example.eggxtremeflight;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -9,9 +11,15 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+
 public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
+    private Bitmap pipeBody, pipeTop, pipeBottom;
+    private final ArrayList<Pipe> pipes = new ArrayList<>();
+    private int pipeSpawnTick = 0;
     private Bird bird;
     private Background background;
+    private final float speed = 5f;
     private final SurfaceHolder holder;
     private Thread thread;
     private volatile boolean isRunning = false;
@@ -27,6 +35,21 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
         while (isRunning) {
             background.update();
             bird.update();
+
+            pipeSpawnTick++;
+            if(pipeSpawnTick>=120){
+                pipeSpawnTick = 0;
+                int gapSize = bird.getSize() * 4;
+                pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
+            }
+            for (int i=pipes.size()- 1; i>=0; i--){
+                Pipe pipe = pipes.get(i);
+                pipe.update();
+                if(pipe.isOutOfScreen()){
+                    pipes.remove(i);
+                }
+            }
+
             if (bird.isOutOfBounds(getHeight())) {
                 isRunning = false;
             }
@@ -36,6 +59,9 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
                 if (canvas != null) {
                     canvas.drawARGB(255, 0, 0, 0);
                     background.draw(canvas);
+                    for (Pipe pipe : pipes) {
+                        pipe.draw(canvas);
+                    }
                     bird.draw(canvas);
                     holder.unlockCanvasAndPost(canvas);
                 }
@@ -65,8 +91,23 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        background = new Background(getContext(), getHeight(), 5f);
+        background = new Background(getContext(), getHeight(), speed);
         bird = new Bird(getContext(), getWidth(), getHeight());
+
+        if (pipeBody == null) {
+            int pipeWidth = (int) (bird.getSize() * 1.5f);
+
+            Bitmap rawBody = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_body);
+            Bitmap rawTop = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_cap_top);
+            Bitmap rawBottom = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_cap_bottom);
+
+            pipeBody = Bitmap.createScaledBitmap(rawBody, pipeWidth, rawBody.getHeight(), true);
+            pipeTop = Bitmap.createScaledBitmap(rawTop, pipeWidth, bird.getSize() / 2, true);
+            pipeBottom = Bitmap.createScaledBitmap(rawBottom, pipeWidth, bird.getSize() / 2, true);
+            rawBody.recycle();
+            rawTop.recycle();
+            rawBottom.recycle();
+        }
 
         isRunning = true;
         thread = new Thread(this);
