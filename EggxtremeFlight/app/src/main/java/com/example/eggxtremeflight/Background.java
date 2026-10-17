@@ -26,18 +26,16 @@ public class Background {
         backgroundX2 = mapWidth;
     }
 
-    public void update(){
-        backgroundX1 -= speed;
-        backgroundX2 = backgroundX1 + mapWidth;
+    public void update(float deltaTime){
+        backgroundX1 -= speed * deltaTime;
+        backgroundX2 -= speed * deltaTime;
 
-        if (backgroundX1 <= -mapWidth) {
-            backgroundX1 += mapWidth;
-            backgroundX2 = backgroundX1 + mapWidth;
-        }
+        if (backgroundX1 <= -mapWidth) backgroundX1 = backgroundX2 + mapWidth;
+        if (backgroundX2 <= -mapWidth) backgroundX2 = backgroundX1 + mapWidth;
     }
 
     public void draw(Canvas canvas){
-        canvas.drawBitmap(gameMap, backgroundX1, 0f, null);
-        canvas.drawBitmap(gameMap, backgroundX2, 0f, null);
+        canvas.drawBitmap(gameMap, (int) backgroundX1, 0f, null);
+        canvas.drawBitmap(gameMap, (int) backgroundX2, 0f, null);
     }
 }

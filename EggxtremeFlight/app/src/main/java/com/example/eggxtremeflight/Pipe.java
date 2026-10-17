@@ -33,8 +33,8 @@ public class Pipe {
         bottomPipe = screenHeight - gap - topPipe;
     }
 
-    public void update(){
-        x -= speed;
+    public void update(float deltaTime){
+        x -= speed * deltaTime;
     }
 
     public void draw(Canvas canvas){

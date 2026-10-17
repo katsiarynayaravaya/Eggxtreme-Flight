@@ -16,10 +16,11 @@ import java.util.ArrayList;
 public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     private Bitmap pipeBody, pipeTop, pipeBottom;
     private final ArrayList<Pipe> pipes = new ArrayList<>();
-    private int pipeSpawnTick = 0;
+    private float pipeSpawnTimer = 0f;
+    private final float PIPE_SPAWN_INTERVAL = 2.0f;
     private Bird bird;
     private Background background;
-    private final float speed = 5f;
+    private final float speed = 200f;
     private final SurfaceHolder holder;
     private Thread thread;
     private volatile boolean isRunning = false;
@@ -32,19 +33,24 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
 
     @Override
     public void run() {
+        long lastTime = System.nanoTime();
         while (isRunning) {
-            background.update();
-            bird.update();
+            long now = System.nanoTime();
+            float deltaTime = (now - lastTime) / 1000000000f;
+            lastTime = now;
+            if (deltaTime > 0.1f) deltaTime = 0.1f;
+            background.update(deltaTime);
+            bird.update(deltaTime);
 
-            pipeSpawnTick++;
-            if(pipeSpawnTick>=120){
-                pipeSpawnTick = 0;
-                int gapSize = bird.getSize() * 4;
+            pipeSpawnTimer += deltaTime;
+            if (pipeSpawnTimer >= PIPE_SPAWN_INTERVAL) {
+                pipeSpawnTimer = 0f;
+                int gapSize = bird.getSize() * 3;
                 pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
             }
             for (int i=pipes.size()- 1; i>=0; i--){
                 Pipe pipe = pipes.get(i);
-                pipe.update();
+                pipe.update(deltaTime);
                 if(pipe.isOutOfScreen()){
                     pipes.remove(i);
                 }
@@ -66,12 +72,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
                     holder.unlockCanvasAndPost(canvas);
                 }
             }
-            try {
-                Thread.sleep(16);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+            Thread.yield();
         }
     }
 
@@ -95,7 +96,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
         bird = new Bird(getContext(), getWidth(), getHeight());
 
         if (pipeBody == null) {
-            int pipeWidth = (int) (bird.getSize() * 1.5f);
+            int pipeWidth = (int) (bird.getSize() * 1.3f);
 
             Bitmap rawBody = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_body);
             Bitmap rawTop = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_cap_top);

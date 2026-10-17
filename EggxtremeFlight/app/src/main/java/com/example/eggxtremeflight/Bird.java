@@ -11,8 +11,8 @@ public class Bird {
     private Bitmap currentSkinFrame;
     private float birdX, birdY;
     private float velocityY = 0f;
-    private final float GRAVITY = 1.2f;
-    private final float JUMP = -18f;
+    private final float GRAVITY = 700f;;
+    private final float JUMP = -350f;
     private int animationTick = 0;
     private int currentFrameIndex = 0;
     private final int size;
@@ -54,7 +54,7 @@ public class Bird {
         currentSkinFrame = skinMid;
     }
 
-    public void update(){
+    public void update(float deltaTime){
         animationTick++;
         if (animationTick >= 6) {
             animationTick = 0;
@@ -72,8 +72,8 @@ public class Bird {
             }
         }
 
-        velocityY += GRAVITY;
-        birdY += velocityY;
+        velocityY += GRAVITY * deltaTime;
+        birdY += velocityY * deltaTime;
     }
 
     public void jump() {
