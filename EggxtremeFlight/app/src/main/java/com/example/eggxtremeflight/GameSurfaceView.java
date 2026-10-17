@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -17,10 +18,12 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     private Bitmap pipeBody, pipeTop, pipeBottom;
     private final ArrayList<Pipe> pipes = new ArrayList<>();
     private float pipeSpawnTimer = 0f;
-    private final float PIPE_SPAWN_INTERVAL = 2.0f;
+    private final float pipeSpawnInterval = 2.0f;
     private Bird bird;
     private Background background;
     private final float speed = 200f;
+    private int score = 0;
+    private Paint scorePaint;
     private final SurfaceHolder holder;
     private Thread thread;
     private volatile boolean isRunning = false;
@@ -39,11 +42,12 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             float deltaTime = (now - lastTime) / 1000000000f;
             lastTime = now;
             if (deltaTime > 0.1f) deltaTime = 0.1f;
+
             background.update(deltaTime);
             bird.update(deltaTime);
 
             pipeSpawnTimer += deltaTime;
-            if (pipeSpawnTimer >= PIPE_SPAWN_INTERVAL) {
+            if (pipeSpawnTimer >= pipeSpawnInterval) {
                 pipeSpawnTimer = 0f;
                 int gapSize = bird.getSize() * 3;
                 pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
@@ -51,6 +55,16 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             for (int i=pipes.size()- 1; i>=0; i--){
                 Pipe pipe = pipes.get(i);
                 pipe.update(deltaTime);
+
+                if(pipe.checkCollision(bird.getX(), bird.getY(), bird.getSize())){
+                    isRunning = false;
+                }
+
+                if(!pipe.isPassed() && bird.getX() > pipe.getX()){
+                    pipe.setPassed(true);
+                    score++;
+                }
+
                 if(pipe.isOutOfScreen()){
                     pipes.remove(i);
                 }
@@ -69,6 +83,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
                         pipe.draw(canvas);
                     }
                     bird.draw(canvas);
+                    canvas.drawText(String.valueOf(score), getWidth() / 2f, bird.getSize() * 1.5f, scorePaint);
                     holder.unlockCanvasAndPost(canvas);
                 }
             }
@@ -94,6 +109,17 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         background = new Background(getContext(), getHeight(), speed);
         bird = new Bird(getContext(), getWidth(), getHeight());
+
+        if (scorePaint == null) {
+            scorePaint = new Paint();
+            scorePaint.setColor(android.graphics.Color.parseColor("#0f0002"));
+            scorePaint.setTextSize(bird.getSize() * 0.8f);
+            android.graphics.Typeface gameTypeface = androidx.core.content.res.ResourcesCompat.getFont(getContext(), R.font.game_font);
+            scorePaint.setTypeface(gameTypeface);
+            scorePaint.setAntiAlias(true);
+            scorePaint.setFakeBoldText(true);
+            scorePaint.setTextAlign(Paint.Align.CENTER);
+        }
 
         if (pipeBody == null) {
             int pipeWidth = (int) (bird.getSize() * 1.3f);

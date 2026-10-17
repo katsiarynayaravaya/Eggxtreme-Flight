@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.RectF;
 
 import java.util.Random;
 
@@ -16,6 +17,7 @@ public class Pipe {
     private final int bottomPipe;
     private float x;
     private final float speed;
+    private boolean isPassed = false;
 
     public Pipe (Bitmap body, Bitmap top, Bitmap bottom, int gap, int screenHeight, int screenWidth, float speed){
         pipeBody = body;
@@ -59,4 +61,27 @@ public class Pipe {
         return x + pipeBody.getWidth() < 0;
     }
 
+    public float getX(){
+        return x + pipeTop.getWidth();
+    }
+
+    public boolean isPassed() {
+        return isPassed;
+    }
+    public void setPassed(boolean passed) {
+        this.isPassed = passed;
+    }
+
+    public boolean checkCollision(float birdX, float birdY, int birdSize) {
+        RectF birdRect = new RectF(birdX, birdY, birdX + birdSize, birdY + birdSize);
+
+        float pipeRightX = x + pipeTop.getWidth();
+        float topPipeBottomY = topPipe - 10f;
+        float bottomPipeTopY = topPipe + gap + 10f;
+
+        RectF topColumnRect = new RectF(x, 0, pipeRightX, topPipeBottomY);
+        RectF bottomColumnRect = new RectF(x, bottomPipeTopY, pipeRightX, 10000f);
+
+        return RectF.intersects(birdRect, topColumnRect) || RectF.intersects(birdRect, bottomColumnRect);
+    }
 }

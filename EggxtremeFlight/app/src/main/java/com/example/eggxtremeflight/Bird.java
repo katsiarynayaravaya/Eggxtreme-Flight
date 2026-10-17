@@ -92,4 +92,7 @@ public class Bird {
         return size;
     }
 
+    public float getX() { return birdX; }
+    public float getY() { return birdY; }
+
 }
