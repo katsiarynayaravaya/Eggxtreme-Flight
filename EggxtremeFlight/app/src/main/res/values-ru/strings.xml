@@ -7,4 +7,7 @@
     <string name="shop_btn_name">Магазин</string>
     <string name="leaders_btn_name">Лидеры</string>
     <string name="settings_btn_name">Настройки</string>
+    <string name="language_title">Язык:</string>
+    <string name="english_btn_language">Английский</string>
+    <string name="russian_btn_language">Русский</string>
 </resources>

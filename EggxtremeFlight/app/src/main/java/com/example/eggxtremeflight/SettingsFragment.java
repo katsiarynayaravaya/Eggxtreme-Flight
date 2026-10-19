@@ -22,6 +22,20 @@ public class SettingsFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        binding.enBtnLanguage.setOnClickListener(v->{
+            LocaleHelper.setLocale(requireContext(), "en");
+            requireActivity().recreate();
+        });
+
+        binding.ruBtnLanguage.setOnClickListener(v->{
+            LocaleHelper.setLocale(requireContext(), "ru");
+            requireActivity().recreate();
+        });
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

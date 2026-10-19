@@ -6,4 +6,7 @@
     <string name="shop_btn_name">Shop</string>
     <string name="leaders_btn_name">Leaders</string>
     <string name="settings_btn_name">Settings</string>
+    <string name="language_title">Language:</string>
+    <string name="english_btn_language">English</string>
+    <string name="russian_btn_language">Russian</string>
 </resources>
