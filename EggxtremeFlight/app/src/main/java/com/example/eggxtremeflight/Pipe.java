@@ -40,21 +40,22 @@ public class Pipe {
     }
 
     public void draw(Canvas canvas){
-        float y = 0f;
-        while(y < topPipe - pipeTop.getHeight()){
+        float finalTopCapY = topPipe - pipeTop.getHeight();
+        float y = finalTopCapY;
+        while(y > -pipeBody.getHeight()){
+            y -= pipeBody.getHeight();
             canvas.drawBitmap(pipeBody, x, y, null);
-            y += pipeBody.getHeight();
-        }
-        canvas.drawBitmap(pipeTop, x, y - 10f, null);
-        float bottomLimit = canvas.getHeight() - bottomPipe;
 
+        }
+        canvas.drawBitmap(pipeTop, x, finalTopCapY - 10f, null);
+
+        float bottomLimit = canvas.getHeight() - bottomPipe;
         y = bottomLimit + pipeBottom.getHeight();
         while (y < canvas.getHeight()) {
             canvas.drawBitmap(pipeBody, x, y, null);
             y += pipeBody.getHeight();
         }
         canvas.drawBitmap(pipeBottom, x, bottomLimit + 10f, null);
-
     }
 
     public boolean isOutOfScreen(){
@@ -75,12 +76,16 @@ public class Pipe {
     public boolean checkCollision(float birdX, float birdY, int birdSize) {
         RectF birdRect = new RectF(birdX, birdY, birdX + birdSize, birdY + birdSize);
 
-        float pipeRightX = x + pipeTop.getWidth();
-        float topPipeBottomY = topPipe - 10f;
-        float bottomPipeTopY = topPipe + gap + 10f;
+        float pipeWidth = pipeTop.getWidth();
+        float tolerance = 30f;
 
-        RectF topColumnRect = new RectF(x, 0, pipeRightX, topPipeBottomY);
-        RectF bottomColumnRect = new RectF(x, bottomPipeTopY, pipeRightX, 10000f);
+        float hitboxLeft = x + tolerance;
+        float hitboxRight = x + pipeWidth - tolerance;
+        float hitboxTopBottom = topPipe - 10f - tolerance;
+        float hitboxBottomTop = topPipe + gap + 10f + tolerance;
+
+        RectF topColumnRect = new RectF(hitboxLeft, 0, hitboxRight, hitboxTopBottom);
+        RectF bottomColumnRect = new RectF(hitboxLeft, hitboxBottomTop, hitboxRight, 10000f);
 
         return RectF.intersects(birdRect, topColumnRect) || RectF.intersects(birdRect, bottomColumnRect);
     }

@@ -18,7 +18,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     private Bitmap pipeBody, pipeTop, pipeBottom;
     private final ArrayList<Pipe> pipes = new ArrayList<>();
     private float pipeSpawnTimer = 0f;
-    private final float pipeSpawnInterval = 2.0f;
+    private final float pipeSpawnInterval = 2.5f;
     private Bird bird;
     private Background background;
     private final float speed = 200f;
@@ -49,7 +49,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             pipeSpawnTimer += deltaTime;
             if (pipeSpawnTimer >= pipeSpawnInterval) {
                 pipeSpawnTimer = 0f;
-                int gapSize = bird.getSize() * 3;
+                int gapSize = bird.getSize() * 2;
                 pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
             }
             for (int i=pipes.size()- 1; i>=0; i--){
