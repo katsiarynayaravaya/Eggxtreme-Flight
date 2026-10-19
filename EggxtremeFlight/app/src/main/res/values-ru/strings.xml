@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Eggxtreme Flight</string>
+    <string name="game_title">Eggxtreme Flight</string>
+    <string name="single_play_btn_name">Одиночная игра</string>
+    <string name="shadowboxing_play_btn_name">Бой с тенью</string>
+    <string name="shop_btn_name">Магазин</string>
+    <string name="leaders_btn_name">Лидеры</string>
+    <string name="settings_btn_name">Настройки</string>
+</resources>
