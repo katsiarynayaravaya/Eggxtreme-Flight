@@ -20,13 +20,20 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     private float pipeSpawnTimer = 0f;
     private final float pipeSpawnInterval = 2.5f;
     private Bird bird;
+    private ShadowBird shadowBird;
     private Background background;
     private final float speed = 200f;
     private int score = 0;
+    private int shadowScore = 0;
     private Paint scorePaint;
     private final SurfaceHolder holder;
     private Thread thread;
     private volatile boolean isRunning = false;
+    private TrajectoryRecorder trajectoryRecorder;
+    private TrajectoryRecorder replayRecorder;
+    private boolean isReplayMode;
+    private long replayStartTime;
+    private GameOverListener gameOverListener;
 
     public GameSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,11 +53,52 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             background.update(deltaTime);
             bird.update(deltaTime);
 
-            pipeSpawnTimer += deltaTime;
-            if (pipeSpawnTimer >= pipeSpawnInterval) {
-                pipeSpawnTimer = 0f;
-                int gapSize = bird.getSize() * 2;
-                pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
+            if (shadowBird != null && shadowBird.isPlaying()) {
+                shadowBird.update(deltaTime);
+            }
+
+            if (trajectoryRecorder != null && trajectoryRecorder.isRecording()) {
+                trajectoryRecorder.recordPoint(bird.getX(), bird.getY());
+            }
+
+            if (isReplayMode && replayRecorder != null) {
+                long elapsedTime = System.currentTimeMillis() - replayStartTime;
+                java.util.List<TrajectoryRecorder.PipeData> pipeDataList = replayRecorder.getPipeDataList();
+                
+                boolean allPipesUsed = true;
+                for (TrajectoryRecorder.PipeData pipeData : pipeDataList) {
+                    if (pipeData.spawnTime <= elapsedTime && !pipeData.used) {
+                        int gapSize = bird.getSize() * 2;
+                        Pipe newPipe = new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed, pipeData.topPipe, pipeData.bottomPipe);
+                        pipes.add(newPipe);
+                        pipeData.used = true;
+                    }
+                    if (!pipeData.used) {
+                        allPipesUsed = false;
+                    }
+                }
+
+                if (allPipesUsed) {
+                    pipeSpawnTimer += deltaTime;
+                    if (pipeSpawnTimer >= pipeSpawnInterval) {
+                        pipeSpawnTimer = 0f;
+                        int gapSize = bird.getSize() * 2;
+                        Pipe newPipe = new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed);
+                        pipes.add(newPipe);
+                    }
+                }
+            } else {
+                pipeSpawnTimer += deltaTime;
+                if (pipeSpawnTimer >= pipeSpawnInterval) {
+                    pipeSpawnTimer = 0f;
+                    int gapSize = bird.getSize() * 2;
+                    Pipe newPipe = new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed);
+                    pipes.add(newPipe);
+                    
+                    if (trajectoryRecorder != null && trajectoryRecorder.isRecording()) {
+                        trajectoryRecorder.recordPipe(newPipe.getTopPipe(), newPipe.getBottomPipe());
+                    }
+                }
             }
             for (int i=pipes.size()- 1; i>=0; i--){
                 Pipe pipe = pipes.get(i);
@@ -58,11 +106,30 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
 
                 if(pipe.checkCollision(bird.getX(), bird.getY(), bird.getSize())){
                     isRunning = false;
+                    if (trajectoryRecorder != null) {
+                        trajectoryRecorder.stopRecording();
+                    }
+                    if (gameOverListener != null) {
+                        final int finalScore = score;
+                        final int finalShadowScore = shadowScore;
+                        final String finalTrajectory = trajectoryRecorder != null ? trajectoryRecorder.toJson() : null;
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+                                gameOverListener.onGameOver(finalScore, finalShadowScore, finalTrajectory);
+                            }
+                        });
+                    }
                 }
 
                 if(!pipe.isPassed() && bird.getX() > pipe.getX()){
                     pipe.setPassed(true);
                     score++;
+                }
+
+                if (shadowBird != null && !pipe.isShadowPassed() && shadowBird.getX() > pipe.getX() && !shadowBird.isDead()) {
+                    pipe.setShadowPassed(true);
+                    shadowScore++;
                 }
 
                 if(pipe.isOutOfScreen()){
@@ -72,6 +139,20 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
 
             if (bird.isOutOfBounds(getHeight())) {
                 isRunning = false;
+                if (trajectoryRecorder != null) {
+                    trajectoryRecorder.stopRecording();
+                }
+                if (gameOverListener != null) {
+                    final int finalScore = score;
+                    final int finalShadowScore = shadowScore;
+                    final String finalTrajectory = trajectoryRecorder != null ? trajectoryRecorder.toJson() : null;
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            gameOverListener.onGameOver(finalScore, finalShadowScore, finalTrajectory);
+                        }
+                    });
+                }
             }
 
             if (holder.getSurface().isValid()) {
@@ -81,6 +162,9 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
                     background.draw(canvas);
                     for (Pipe pipe : pipes) {
                         pipe.draw(canvas);
+                    }
+                    if (shadowBird != null && shadowBird.isPlaying()) {
+                        shadowBird.draw(canvas);
                     }
                     bird.draw(canvas);
                     canvas.drawText(String.valueOf(score), getWidth() / 2f, bird.getSize() * 1.5f, scorePaint);
@@ -109,6 +193,14 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         background = new Background(getContext(), getHeight(), speed);
         bird = new Bird(getContext(), getWidth(), getHeight());
+        
+        if (shadowBird == null) {
+            shadowBird = new ShadowBird(getContext(), getWidth(), getHeight());
+        }
+
+        if (isReplayMode) {
+            replayStartTime = System.currentTimeMillis();
+        }
 
         if (scorePaint == null) {
             scorePaint = new Paint();
@@ -151,5 +243,45 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public void setTrajectoryRecorder(TrajectoryRecorder trajectoryRecorder) {
+        this.trajectoryRecorder = trajectoryRecorder;
+    }
+
+    public TrajectoryRecorder getTrajectoryRecorder() {
+        return trajectoryRecorder;
+    }
+
+    public void setGameOverListener(GameOverListener listener) {
+        this.gameOverListener = listener;
+    }
+
+    public void setShadowBird(ShadowBird shadowBird) {
+        this.shadowBird = shadowBird;
+    }
+
+    public ShadowBird getShadowBird() {
+        return shadowBird;
+    }
+
+    public void setReplayMode(boolean replayMode) {
+        this.isReplayMode = replayMode;
+    }
+
+    public void setReplayRecorder(TrajectoryRecorder replayRecorder) {
+        this.replayRecorder = replayRecorder;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getShadowScore() {
+        return shadowScore;
+    }
+
+    public interface GameOverListener {
+        void onGameOver(int playerScore, int shadowScore, String trajectoryJson);
     }
 }

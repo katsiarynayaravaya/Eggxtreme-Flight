@@ -18,6 +18,7 @@ public class Pipe {
     private float x;
     private final float speed;
     private boolean isPassed = false;
+    private boolean isShadowPassed = false;
 
     public Pipe (Bitmap body, Bitmap top, Bitmap bottom, int gap, int screenHeight, int screenWidth, float speed){
         pipeBody = body;
@@ -33,6 +34,20 @@ public class Pipe {
         Random random = new Random();
         topPipe = minHeight + random.nextInt(maxHeight - minHeight);
         bottomPipe = screenHeight - gap - topPipe;
+    }
+
+    public Pipe (Bitmap body, Bitmap top, Bitmap bottom, int gap, int screenHeight, int screenWidth, float speed, float topPipe, float bottomPipe){
+        pipeBody = body;
+        pipeTop = top;
+        pipeBottom = bottom;
+
+        this.gap = gap;
+        minHeight = screenHeight / 6;
+        maxHeight = screenHeight - gap - minHeight;
+        x = screenWidth;
+        this.speed = speed;
+        this.topPipe = (int) topPipe;
+        this.bottomPipe = (int) bottomPipe;
     }
 
     public void update(float deltaTime){
@@ -66,11 +81,26 @@ public class Pipe {
         return x + pipeTop.getWidth();
     }
 
+    public float getTopPipe() {
+        return topPipe;
+    }
+
+    public float getBottomPipe() {
+        return bottomPipe;
+    }
+
     public boolean isPassed() {
         return isPassed;
     }
     public void setPassed(boolean passed) {
         this.isPassed = passed;
+    }
+
+    public boolean isShadowPassed() {
+        return isShadowPassed;
+    }
+    public void setShadowPassed(boolean passed) {
+        this.isShadowPassed = passed;
     }
 
     public boolean checkCollision(float birdX, float birdY, int birdSize) {
