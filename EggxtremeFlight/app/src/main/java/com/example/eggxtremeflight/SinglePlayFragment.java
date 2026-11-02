@@ -53,9 +53,13 @@ public class SinglePlayFragment extends Fragment {
         Log.d(TAG, "Game over: score=" + score + ", skin=" + skinId
                 + ", samples=" + trajectory.size());
 
+        View root = binding == null ? null : binding.getRoot();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             showToast(R.string.session_not_signed_in);
+            if (root != null) {
+                GameOverFragment.open(root, score, -1, false);
+            }
             return;
         }
 
@@ -79,6 +83,9 @@ public class SinglePlayFragment extends Fragment {
                         showToast(R.string.session_save_error);
                     }
                 });
+        if (root != null) {
+            GameOverFragment.open(root, score, -1, false);
+        }
     }
 
     private void showToast(int stringRes, Object... args) {

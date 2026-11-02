@@ -68,13 +68,18 @@ public class ShadowboxingFragment extends Fragment {
     }
 
     private void handleGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs) {
+        int shadowScore = binding == null ? -1 : binding.shadowGameView.getOpponentScore();
+        View root = binding == null ? null : binding.getRoot();
         Log.d(TAG, "Game over: score=" + score + ", skin=" + skinId
                 + ", samples=" + trajectory.size()
-                + ", shadow=" + (binding == null ? -1 : binding.shadowGameView.getOpponentScore()));
+                + ", shadow=" + shadowScore);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             showToast(R.string.session_not_signed_in);
+            if (root != null) {
+                GameOverFragment.open(root, score, shadowScore, true);
+            }
             return;
         }
 
@@ -98,6 +103,9 @@ public class ShadowboxingFragment extends Fragment {
                         showToast(R.string.session_save_error);
                     }
                 });
+        if (root != null) {
+            GameOverFragment.open(root, score, shadowScore, true);
+        }
     }
 
     private void showToast(int stringRes, Object... args) {
