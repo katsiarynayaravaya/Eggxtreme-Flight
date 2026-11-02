@@ -10,4 +10,11 @@
     <string name="language_title">Язык:</string>
     <string name="english_btn_language">Английский</string>
     <string name="russian_btn_language">Русский</string>
+    <string name="nickname_dialog_title">Добро пожаловать!</string>
+    <string name="nickname_dialog_message">Выбери никнейм для таблицы лидеров</string>
+    <string name="nickname_hint">Никнейм</string>
+    <string name="nickname_save">Сохранить</string>
+    <string name="nickname_error_length">От 3 до 16 символов</string>
+    <string name="nickname_save_error">Не удалось сохранить никнейм. Проверь интернет</string>
+    <string name="auth_error">Не удалось войти. Проверь интернет</string>
 </resources>
