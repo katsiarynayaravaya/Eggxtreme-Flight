@@ -17,4 +17,8 @@
     <string name="nickname_error_length">От 3 до 16 символов</string>
     <string name="nickname_save_error">Не удалось сохранить никнейм. Проверь интернет</string>
     <string name="auth_error">Не удалось войти. Проверь интернет</string>
+    <string name="session_new_record">Новый рекорд! Счёт: %1$d</string>
+    <string name="session_saved">Счёт: %1$d. Рекорд: %2$d</string>
+    <string name="session_save_error">Не удалось сохранить результат. Проверь интернет</string>
+    <string name="session_not_signed_in">Результат не сохранён: не удалось войти</string>
 </resources>
