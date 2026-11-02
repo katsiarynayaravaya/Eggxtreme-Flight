@@ -26,4 +26,9 @@
     <string name="leaders_error">Не удалось загрузить таблицу лидеров. Проверь интернет</string>
     <string name="leaders_retry">Повторить</string>
     <string name="leaders_you_format">%1$s (ты)</string>
+    <string name="skin1_name">Курица</string>
+    <string name="skin2_name">Яйцо</string>
+    <string name="skin3_name">Наггетс</string>
+    <string name="shop_select">Выбрать</string>
+    <string name="shop_selected">Выбрано</string>
 </resources>

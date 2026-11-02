@@ -1,7 +1,6 @@
 package com.example.eggxtremeflight;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,12 +9,12 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.example.eggxtremeflight.databinding.FragmentShopBinding;
 
 public class ShopFragment extends Fragment {
     private FragmentShopBinding binding;
-    private SharedPreferences sharedPreferences;
 
     @Nullable
     @Override
@@ -27,23 +26,20 @@ public class ShopFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        sharedPreferences = requireActivity().getSharedPreferences("GameSharedPreferences", Context.MODE_PRIVATE);
-        String savedSkin = sharedPreferences.getString("selected_skin", "skin1");
-        binding.btnSkin1.setOnClickListener(v -> {
-            saveSkin("skin1");
-        });
+        Context context = requireContext();
 
-        binding.btnSkin2.setOnClickListener(v -> {
-            saveSkin("skin2");
-        });
+        // Количество колонок зависит от ширины экрана: 2 на телефоне, до 4 на планшете
+        int screenWidthDp = getResources().getConfiguration().screenWidthDp;
+        int columns = Math.max(2, Math.min(4, screenWidthDp / 180));
 
-        binding.btnSkin3.setOnClickListener(v -> {
-            saveSkin("skin3");
-        });
-    }
+        String selectedId = SkinCatalog.getSelectedSkin(context).id;
+        SkinsAdapter adapter = new SkinsAdapter(
+                SkinCatalog.getAll(),
+                selectedId,
+                skin -> SkinCatalog.saveSelectedSkinId(context, skin.id));
 
-    private void saveSkin(String skinId) {
-        sharedPreferences.edit().putString("selected_skin", skinId).apply();
+        binding.skinsRecycler.setLayoutManager(new GridLayoutManager(context, columns));
+        binding.skinsRecycler.setAdapter(adapter);
     }
 
     @Override
