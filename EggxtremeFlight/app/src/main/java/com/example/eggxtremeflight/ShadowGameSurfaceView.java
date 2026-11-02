@@ -48,6 +48,7 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
     private volatile boolean gameOver = false;
     private OnGameOverListener gameOverListener;
     private Matchmaking.Opponent opponent;
+    private ShadowBird shadowBird;
 
     public ShadowGameSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -82,6 +83,9 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
 
             background.update(deltaTime);
             bird.update(deltaTime);
+            if (shadowBird != null) {
+                shadowBird.update(deltaTime);
+            }
 
             sampleTimer += deltaTime;
             if (sampleTimer >= SAMPLE_INTERVAL_S) {
@@ -128,6 +132,9 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
                     for (Pipe pipe : pipes) {
                         pipe.draw(canvas);
                     }
+                    if (shadowBird != null) {
+                        shadowBird.draw(canvas);
+                    }
                     bird.draw(canvas);
                     canvas.drawText(String.valueOf(score), getWidth() / 2f, bird.getSize() * 1.5f, scorePaint);
                     holder.unlockCanvasAndPost(canvas);
@@ -171,6 +178,10 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
 
     private void startLoop() {
         if (thread != null && thread.isAlive()) return;
+        if (opponent != null) {
+            shadowBird = new ShadowBird(getContext(), getWidth(), getHeight(), opponent);
+            shadowBird.start();
+        }
         resetGame();
         isRunning = true;
         thread = new Thread(this);
