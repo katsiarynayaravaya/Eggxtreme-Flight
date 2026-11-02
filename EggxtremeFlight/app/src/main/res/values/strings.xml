@@ -30,4 +30,5 @@
     <string name="skin3_name">Nugget</string>
     <string name="shop_select">Select</string>
     <string name="shop_selected">Selected</string>
+    <string name="shadow_searching">Looking for a shadow...</string>
 </resources>

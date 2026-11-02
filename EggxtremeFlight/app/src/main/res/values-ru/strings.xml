@@ -31,4 +31,5 @@
     <string name="skin3_name">Наггетс</string>
     <string name="shop_select">Выбрать</string>
     <string name="shop_selected">Выбрано</string>
+    <string name="shadow_searching">Ищем тень...</string>
 </resources>
