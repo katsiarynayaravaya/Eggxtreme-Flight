@@ -9,4 +9,11 @@
     <string name="language_title">Language:</string>
     <string name="english_btn_language">English</string>
     <string name="russian_btn_language">Russian</string>
+    <string name="nickname_dialog_title">Welcome!</string>
+    <string name="nickname_dialog_message">Choose a nickname for the leaderboard</string>
+    <string name="nickname_hint">Nickname</string>
+    <string name="nickname_save">Save</string>
+    <string name="nickname_error_length">3 to 16 characters</string>
+    <string name="nickname_save_error">Could not save nickname. Check your internet connection</string>
+    <string name="auth_error">Sign-in failed. Check your internet connection</string>
 </resources>
