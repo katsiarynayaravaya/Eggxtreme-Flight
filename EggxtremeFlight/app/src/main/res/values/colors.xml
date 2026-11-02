@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="leader_text">#FF0F0002</color>
+    <color name="leader_highlight">#55FFD54F</color>
+    <color name="leader_divider">#33000000</color>
+    <color name="panel_background">#FFFBF3E3</color>
+    <color name="panel_border">#FF5A4636</color>
+    <color name="retry_background">#FFEEDDB5</color>
 </resources>

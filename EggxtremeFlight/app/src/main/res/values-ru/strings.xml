@@ -21,4 +21,9 @@
     <string name="session_saved">Счёт: %1$d. Рекорд: %2$d</string>
     <string name="session_save_error">Не удалось сохранить результат. Проверь интернет</string>
     <string name="session_not_signed_in">Результат не сохранён: не удалось войти</string>
+    <string name="leaders_title">Топ-10</string>
+    <string name="leaders_empty">Пока нет результатов. Стань первым!</string>
+    <string name="leaders_error">Не удалось загрузить таблицу лидеров. Проверь интернет</string>
+    <string name="leaders_retry">Повторить</string>
+    <string name="leaders_you_format">%1$s (ты)</string>
 </resources>
