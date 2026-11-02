@@ -45,4 +45,8 @@
         android:name="com.example.eggxtremeflight.SettingsFragment"
         tools:layout="@layout/fragment_settings"/>
 
+    <fragment android:id="@+id/fragment_game_over"
+        android:name="com.example.eggxtremeflight.GameOverFragment"
+        tools:layout="@layout/fragment_game_over"/>
+
 </navigation>

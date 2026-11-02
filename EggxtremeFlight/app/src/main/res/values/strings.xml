@@ -31,4 +31,12 @@
     <string name="shop_select">Select</string>
     <string name="shop_selected">Selected</string>
     <string name="shadow_searching">Looking for a shadow...</string>
+    <string name="game_over_title">Game over</string>
+    <string name="your_score">Your score</string>
+    <string name="shadow_score">Shadow score</string>
+    <string name="shadow_win">Victory over the Shadow!</string>
+    <string name="shadow_lose">The Shadow was faster</string>
+    <string name="shadow_draw">Draw</string>
+    <string name="rematch_btn">Rematch</string>
+    <string name="main_menu_btn">Main menu</string>
 </resources>
