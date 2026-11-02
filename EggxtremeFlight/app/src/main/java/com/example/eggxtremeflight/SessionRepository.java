@@ -21,28 +21,32 @@ public class SessionRepository {
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public void saveSession(Context context, String trajectory, int score, String skinId, Callback<Void> callback) {
-        FirebaseUser user = auth.getCurrentUser();
+    public void saveSession(FirebaseUser user, int score, String skinId, List<Double> trajectory, int sampleIntervalMs, Callback<SaveResult> callback) {
         if (user == null) {
             callback.onError(new Exception("User not signed in"));
             return;
         }
 
         Map<String, Object> sessionData = new java.util.HashMap<>();
-        sessionData.put("trajectory", trajectory);
         sessionData.put("score", score);
         sessionData.put("skinId", skinId);
+        sessionData.put("trajectory", trajectory);
+        sessionData.put("sampleIntervalMs", sampleIntervalMs);
         sessionData.put("userId", user.getUid());
         sessionData.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
 
         db.collection("sessions").add(sessionData)
-                .addOnSuccessListener(documentReference -> callback.onSuccess(null))
+                .addOnSuccessListener(documentReference -> {
+                    SaveResult result = new SaveResult();
+                    result.sessionId = documentReference.getId();
+                    result.newRecord = false; // TODO: check if new record
+                    result.bestScore = score; // TODO: fetch actual best score
+                    callback.onSuccess(result);
+                })
                 .addOnFailureListener(callback::onError);
     }
 
     public void findOpponentSession(int playerScore, Callback<OpponentSession> callback) {
-        // Запрос: найти сессию с score наиболее близким к playerScore
-        // Ищем в диапазоне ±20% от playerScore
         int minScore = (int) (playerScore * 0.8);
         int maxScore = (int) (playerScore * 1.2);
 
@@ -53,12 +57,10 @@ public class SessionRepository {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot.isEmpty()) {
-                        // Если база пустая - вернуть дефолтную траекторию бота
                         callback.onSuccess(createDefaultBotSession());
                         return;
                     }
 
-                    // Найти сессию с score наиболее близким к playerScore
                     DocumentSnapshot bestMatch = null;
                     int minDiff = Integer.MAX_VALUE;
 
@@ -73,9 +75,10 @@ public class SessionRepository {
 
                     if (bestMatch != null) {
                         OpponentSession session = new OpponentSession();
-                        session.trajectory = bestMatch.getString("trajectory");
+                        session.trajectory = (List<Double>) bestMatch.get("trajectory");
                         session.score = bestMatch.getLong("score").intValue();
                         session.skinId = bestMatch.getString("skinId");
+                        session.sampleIntervalMs = bestMatch.getLong("sampleIntervalMs").intValue();
                         callback.onSuccess(session);
                     } else {
                         callback.onSuccess(createDefaultBotSession());
@@ -86,15 +89,23 @@ public class SessionRepository {
 
     private OpponentSession createDefaultBotSession() {
         OpponentSession session = new OpponentSession();
-        session.trajectory = null; // Пустая траектория - тень не будет
+        session.trajectory = new ArrayList<>();
         session.score = 0;
         session.skinId = "skin1";
+        session.sampleIntervalMs = 100;
         return session;
     }
 
+    public static class SaveResult {
+        public String sessionId;
+        public boolean newRecord;
+        public int bestScore;
+    }
+
     public static class OpponentSession {
-        public String trajectory;
+        public List<Double> trajectory;
         public int score;
         public String skinId;
+        public int sampleIntervalMs;
     }
 }

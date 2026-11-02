@@ -1,12 +1,12 @@
 package com.example.eggxtremeflight;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -21,10 +21,9 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.List;
 
 public class SinglePlayFragment extends Fragment {
-    private static final String TAG = "SessionSave";
-
+    private static final String TAG = "SinglePlay";
     private FragmentSinglePlayBinding binding;
-    private final SessionRepository sessionRepository = new SessionRepository();
+    private SessionRepository sessionRepository;
 
     @Nullable
     @Override
@@ -36,6 +35,16 @@ public class SinglePlayFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        sessionRepository = new SessionRepository();
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("GameSharedPreferences", Context.MODE_PRIVATE);
+        String skinId = prefs.getString("selected_skin", "skin1");
+
+        binding.gameSurfaceView.setOnGameOverListener((score, currentSkinId, trajectory, sampleIntervalMs) -> {
+            handleGameOver(score, currentSkinId, trajectory, sampleIntervalMs);
+        });
+
         requireActivity().getOnBackPressedDispatcher().addCallback(
                 getViewLifecycleOwner(),
                 new OnBackPressedCallback(true) {
@@ -45,46 +54,29 @@ public class SinglePlayFragment extends Fragment {
                     }
                 }
         );
-
-        binding.gameSurfaceView.setOnGameOverListener(this::handleGameOver);
     }
 
     private void handleGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs) {
-        Log.d(TAG, "Game over: score=" + score + ", skin=" + skinId
-                + ", samples=" + trajectory.size());
+        Log.d(TAG, "Game over: score=" + score + ", skin=" + skinId + ", samples=" + trajectory.size());
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            showToast(R.string.session_not_signed_in);
+            Log.e(TAG, "User not signed in");
             return;
         }
 
         sessionRepository.saveSession(user, score, skinId, trajectory, sampleIntervalMs,
-                new UserRepository.Callback<SessionRepository.SaveResult>() {
+                new SessionRepository.Callback<SessionRepository.SaveResult>() {
                     @Override
                     public void onSuccess(SessionRepository.SaveResult result) {
-                        Log.d(TAG, "Saved: id=" + result.sessionId
-                                + ", newRecord=" + result.newRecord
-                                + ", best=" + result.bestScore);
-                        if (result.newRecord) {
-                            showToast(R.string.session_new_record, score);
-                        } else {
-                            showToast(R.string.session_saved, score, result.bestScore);
-                        }
+                        Log.d(TAG, "Session saved: id=" + result.sessionId);
                     }
 
                     @Override
                     public void onError(Exception e) {
-                        Log.e(TAG, "Save failed", e);
-                        showToast(R.string.session_save_error);
+                        Log.e(TAG, "Failed to save session", e);
                     }
                 });
-    }
-
-    private void showToast(int stringRes, Object... args) {
-        Context context = getContext();
-        if (context == null) return;
-        Toast.makeText(context, context.getString(stringRes, args), Toast.LENGTH_LONG).show();
     }
 
     @Override
