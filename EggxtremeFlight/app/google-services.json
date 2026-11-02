@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "524422442678",
+    "project_id": "eggxtreme-flight",
+    "storage_bucket": "eggxtreme-flight.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:524422442678:android:f5443c313adbd5dba0c017",
+        "android_client_info": {
+          "package_name": "com.example.eggxtremeflight"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP9xGKiB8OnV-WjoO8ynTv0VMxd2_0iTY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
