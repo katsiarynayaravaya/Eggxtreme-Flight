@@ -35,6 +35,20 @@ public class Pipe {
         bottomPipe = screenHeight - gap - topPipe;
     }
 
+    public Pipe (Bitmap body, Bitmap top, Bitmap bottom, int gap, int screenHeight, int screenWidth, float speed, float topPipe, float bottomPipe){
+        pipeBody = body;
+        pipeTop = top;
+        pipeBottom = bottom;
+
+        this.gap = gap;
+        minHeight = screenHeight / 6;
+        maxHeight = screenHeight - gap - minHeight;
+        x = screenWidth;
+        this.speed = speed;
+        this.topPipe = (int) topPipe;
+        this.bottomPipe = (int) bottomPipe;
+    }
+
     public void update(float deltaTime){
         x -= speed * deltaTime;
     }
