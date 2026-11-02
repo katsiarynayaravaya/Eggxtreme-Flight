@@ -11,4 +11,8 @@
     <color name="skin_selected_fill">#FFFFE9A8</color>
     <color name="skin_selected_border">#FFE0A100</color>
     <color name="skin_button_selected_fill">#FFFFD54F</color>
+    <color name="input_hint">#8A5A4636</color>
+    <color name="input_fill">#FFFFFDF7</color>
+    <color name="button_gold">#FFFFD54F</color>
+    <color name="error_red">#FFB3261E</color>
 </resources>
