@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,8 +62,10 @@ public class UserRepository {
         Context appContext = context.getApplicationContext();
         Map<String, Object> data = new HashMap<>();
         data.put("nickname", nickname);
+        data.put("bestScore", 0);
         data.put("createdAt", FieldValue.serverTimestamp());
-        db.collection("users").document(user.getUid()).set(data)
+        db.collection("users").document(user.getUid())
+                .set(data, SetOptions.merge())
                 .addOnSuccessListener(unused -> {
                     cacheNickname(appContext, nickname);
                     callback.onSuccess(null);

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() >= 3
+        && request.resource.data.nickname.size() <= 16
+        && request.resource.data.get('bestScore', 0) == 0;
+
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() >= 3
+        && request.resource.data.nickname.size() <= 16
+        && request.resource.data.get('bestScore', 0) is int
+        && request.resource.data.get('bestScore', 0) >= resource.data.get('bestScore', 0)
+        && request.resource.data.get('bestScore', 0) <= 100000;
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 100000
+        && request.resource.data.skinId is string
+        && request.resource.data.trajectory is list
+        && request.resource.data.trajectory.size() <= 6000;
+
+      allow update, delete: if false;
+    }
+  }
+}
