@@ -16,6 +16,7 @@ public class Bird {
     private int animationTick = 0;
     private int currentFrameIndex = 0;
     private final int size;
+    private final String skinId;
 
     public Bird(Context context, int screenWidth, int screenHeight){
         this.size = screenHeight / 12;
@@ -24,6 +25,7 @@ public class Bird {
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("GameSharedPreferences", Context.MODE_PRIVATE);
         String activeSkin = sharedPreferences.getString("selected_skin", "skin1");
+        this.skinId = activeSkin;
 
         int resUp, resMid, resDown;
         if (activeSkin.equals("skin2")) {
@@ -94,5 +96,7 @@ public class Bird {
 
     public float getX() { return birdX; }
     public float getY() { return birdY; }
+
+    public String getSkinId() { return skinId; }
 
 }

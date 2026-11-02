@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -13,8 +15,18 @@ import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
+
+    public interface OnGameOverListener {
+        void onGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs);
+    }
+
+    public static final int SAMPLE_INTERVAL_MS = 100;
+    private static final float SAMPLE_INTERVAL_S = SAMPLE_INTERVAL_MS / 1000f;
+    private static final int MAX_SAMPLES = 6000;
+
     private Bitmap pipeBody, pipeTop, pipeBottom;
     private final ArrayList<Pipe> pipes = new ArrayList<>();
     private float pipeSpawnTimer = 0f;
@@ -28,10 +40,19 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     private Thread thread;
     private volatile boolean isRunning = false;
 
+    private final ArrayList<Double> trajectory = new ArrayList<>();
+    private float sampleTimer = 0f;
+    private volatile boolean gameOver = false;
+    private OnGameOverListener gameOverListener;
+
     public GameSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         holder = getHolder();
         holder.addCallback(this);
+    }
+
+    public void setOnGameOverListener(OnGameOverListener listener) {
+        this.gameOverListener = listener;
     }
 
     @Override
@@ -46,6 +67,12 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             background.update(deltaTime);
             bird.update(deltaTime);
 
+            sampleTimer += deltaTime;
+            if (sampleTimer >= SAMPLE_INTERVAL_S) {
+                sampleTimer -= SAMPLE_INTERVAL_S;
+                recordSample();
+            }
+
             pipeSpawnTimer += deltaTime;
             if (pipeSpawnTimer >= pipeSpawnInterval) {
                 pipeSpawnTimer = 0f;
@@ -57,7 +84,9 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
                 pipe.update(deltaTime);
 
                 if(pipe.checkCollision(bird.getX(), bird.getY(), bird.getSize())){
+                    gameOver = true;
                     isRunning = false;
+                    break;
                 }
 
                 if(!pipe.isPassed() && bird.getX() > pipe.getX()){
@@ -71,6 +100,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             }
 
             if (bird.isOutOfBounds(getHeight())) {
+                gameOver = true;
                 isRunning = false;
             }
 
@@ -89,8 +119,39 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             }
             Thread.yield();
         }
+
+        if (gameOver) {
+            recordSample();
+            reportGameOver();
+        }
     }
 
+    private void recordSample() {
+        int height = getHeight();
+        if (bird == null || height == 0 || trajectory.size() >= MAX_SAMPLES) return;
+        float normalized = Math.max(0f, Math.min(1f, bird.getY() / height));
+        trajectory.add(Math.round(normalized * 1000) / 1000.0);
+    }
+
+    private void reportGameOver() {
+        final OnGameOverListener listener = gameOverListener;
+        if (listener == null) return;
+        final int finalScore = score;
+        final String skinId = bird.getSkinId();
+        final List<Double> trajectoryCopy = new ArrayList<>(trajectory);
+        new Handler(Looper.getMainLooper()).post(() ->
+                listener.onGameOver(finalScore, skinId, trajectoryCopy, SAMPLE_INTERVAL_MS));
+    }
+
+    private void resetGame() {
+        pipes.clear();
+        pipeSpawnTimer = 0f;
+        score = 0;
+        gameOver = false;
+        sampleTimer = 0f;
+        trajectory.clear();
+        recordSample();
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -135,6 +196,8 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             rawTop.recycle();
             rawBottom.recycle();
         }
+
+        resetGame();
 
         isRunning = true;
         thread = new Thread(this);
