@@ -1,26 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="8dp">
+    android:padding="16dp">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/nicknameInputLayout"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/nickname_hint"
-        app:counterEnabled="true"
-        app:counterMaxLength="16">
+        android:background="@drawable/nickname_panel_background"
+        android:gravity="center_horizontal"
+        android:minWidth="280dp"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:contentDescription="@null"
+            android:src="@drawable/chicken_icon" />
+
+        <TextView
+            android:id="@+id/nicknameTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/game_font"
+            android:gravity="center"
+            android:text="@string/nickname_dialog_title"
+            android:textColor="@color/leader_text"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/nicknameMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/game_font"
+            android:gravity="center"
+            android:text="@string/nickname_dialog_message"
+            android:textColor="@color/leader_text"
+            android:textSize="18sp" />
+
+        <EditText
             android:id="@+id/nicknameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/nickname_input_background"
+            android:fontFamily="@font/game_font"
+            android:gravity="center_vertical"
+            android:hint="@string/nickname_hint"
+            android:imeOptions="actionDone"
             android:inputType="text"
             android:maxLength="16"
-            android:maxLines="1" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:maxLines="1"
+            android:minHeight="52dp"
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="10dp"
+            android:textColor="@color/leader_text"
+            android:textColorHint="@color/input_hint"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/nicknameError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/game_font"
+            android:gravity="center"
+            android:textColor="@color/error_red"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/nicknameSaveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/nickname_button_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/game_font"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/nickname_save"
+            android:textColor="@color/leader_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </FrameLayout>

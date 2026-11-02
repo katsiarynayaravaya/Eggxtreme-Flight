@@ -1,9 +1,15 @@
 package com.example.eggxtremeflight;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.widget.Button;
-import android.widget.Toast;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -19,24 +25,52 @@ public class NicknameDialog {
                 DialogNicknameBinding.inflate(LayoutInflater.from(activity));
 
         AlertDialog dialog = new MaterialAlertDialogBuilder(activity)
-                .setTitle(R.string.nickname_dialog_title)
-                .setMessage(R.string.nickname_dialog_message)
                 .setView(binding.getRoot())
                 .setCancelable(false)
-                .setPositiveButton(R.string.nickname_save, null)
                 .create();
         dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
 
-        Button saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        saveButton.setOnClickListener(v -> {
+        Window window = dialog.getWindow();
+        if (window != null) {
+            // Убираем стандартный белый фон окна: рисовать будет наша панель
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+                    | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+
+        // Как только игрок начинает печатать, убираем сообщение об ошибке
+        binding.nicknameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                binding.nicknameError.setVisibility(View.GONE);
+            }
+        });
+
+        // Кнопка "Готово" на клавиатуре работает как "Сохранить"
+        binding.nicknameEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.nicknameSaveButton.performClick();
+                return true;
+            }
+            return false;
+        });
+
+        binding.nicknameSaveButton.setOnClickListener(v -> {
             String nickname = String.valueOf(binding.nicknameEditText.getText()).trim();
             if (nickname.length() < 3 || nickname.length() > 16) {
-                binding.nicknameInputLayout.setError(activity.getString(R.string.nickname_error_length));
+                showError(binding, activity.getString(R.string.nickname_error_length));
                 return;
             }
-            binding.nicknameInputLayout.setError(null);
-            saveButton.setEnabled(false);
+            binding.nicknameError.setVisibility(View.GONE);
+            setSaving(binding, true);
 
             repository.saveNickname(activity, user, nickname, new UserRepository.Callback<Void>() {
                 @Override
@@ -47,11 +81,24 @@ public class NicknameDialog {
 
                 @Override
                 public void onError(Exception e) {
-                    saveButton.setEnabled(true);
-                    Toast.makeText(activity, R.string.nickname_save_error, Toast.LENGTH_LONG).show();
+                    setSaving(binding, false);
+                    showError(binding, activity.getString(R.string.nickname_save_error));
                 }
             });
         });
+
+        dialog.show();
         return dialog;
+    }
+
+    private static void showError(DialogNicknameBinding binding, String message) {
+        binding.nicknameError.setText(message);
+        binding.nicknameError.setVisibility(View.VISIBLE);
+    }
+
+    /** Пока идёт сохранение, кнопка блокируется и становится полупрозрачной. */
+    private static void setSaving(DialogNicknameBinding binding, boolean saving) {
+        binding.nicknameSaveButton.setEnabled(!saving);
+        binding.nicknameSaveButton.setAlpha(saving ? 0.5f : 1f);
     }
 }
