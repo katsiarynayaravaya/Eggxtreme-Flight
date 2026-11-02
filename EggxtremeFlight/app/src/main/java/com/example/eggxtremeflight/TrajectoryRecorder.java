@@ -40,6 +40,7 @@ public class TrajectoryRecorder {
     private boolean isRecording;
     private final int sampleRateMs;
     private int finalScore;
+    private String skinId;
 
     public TrajectoryRecorder(int sampleRateMs) {
         this.trajectoryPoints = new ArrayList<>();
@@ -48,6 +49,7 @@ public class TrajectoryRecorder {
         this.isRecording = false;
         this.sampleRateMs = sampleRateMs;
         this.finalScore = 0;
+        this.skinId = "skin1";
     }
 
     public TrajectoryRecorder() {
@@ -58,6 +60,7 @@ public class TrajectoryRecorder {
         isRecording = true;
         trajectoryPoints.clear();
         finalScore = 0;
+        skinId = "skin1";
     }
 
     public void stopRecording() {
@@ -66,6 +69,10 @@ public class TrajectoryRecorder {
 
     public void setFinalScore(int score) {
         this.finalScore = score;
+    }
+
+    public void setSkinId(String skinId) {
+        this.skinId = skinId;
     }
 
     public void recordPoint(float x, float y) {
@@ -113,6 +120,7 @@ public class TrajectoryRecorder {
             json.put("totalPoints", trajectoryPoints.size());
             json.put("totalPipes", pipeDataList.size());
             json.put("finalScore", finalScore);
+            json.put("skinId", skinId);
             
             return json.toString();
         } catch (JSONException e) {
@@ -146,6 +154,7 @@ public class TrajectoryRecorder {
             }
 
             finalScore = json.getInt("finalScore");
+            skinId = json.optString("skinId", "skin1");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -177,5 +186,9 @@ public class TrajectoryRecorder {
 
     public int getFinalScore() {
         return finalScore;
+    }
+
+    public String getSkinId() {
+        return skinId;
     }
 }
