@@ -1,7 +1,6 @@
 package com.example.eggxtremeflight;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -23,28 +22,12 @@ public class Bird {
         this.birdX = screenWidth / 4f;
         this.birdY = screenHeight / 2f;
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences("GameSharedPreferences", Context.MODE_PRIVATE);
-        String activeSkin = sharedPreferences.getString("selected_skin", "skin1");
-        this.skinId = activeSkin;
+        SkinItem skin = SkinCatalog.getSelectedSkin(context);
+        this.skinId = skin.id;
 
-        int resUp, resMid, resDown;
-        if (activeSkin.equals("skin2")) {
-            resUp = R.drawable.skin2_egg_up;
-            resMid = R.drawable.skin2_egg_mid;
-            resDown = R.drawable.skin2_egg_down;
-        } else if (activeSkin.equals("skin3")) {
-            resUp = R.drawable.skin3_nagget_up;
-            resMid = R.drawable.skin3_nagget_mid;
-            resDown = R.drawable.skin3_nagget_down;
-        } else {
-            resUp = R.drawable.skin1_chicken_up;
-            resMid = R.drawable.skin1_chicken_mid;
-            resDown = R.drawable.skin1_chicken_down;
-        }
-
-        Bitmap rawUp = BitmapFactory.decodeResource(context.getResources(), resUp);
-        Bitmap rawMid = BitmapFactory.decodeResource(context.getResources(), resMid);
-        Bitmap rawDown = BitmapFactory.decodeResource(context.getResources(), resDown);
+        Bitmap rawUp = BitmapFactory.decodeResource(context.getResources(), skin.upRes);
+        Bitmap rawMid = BitmapFactory.decodeResource(context.getResources(), skin.midRes);
+        Bitmap rawDown = BitmapFactory.decodeResource(context.getResources(), skin.downRes);
 
         skinUp = Bitmap.createScaledBitmap(rawUp, size, size, true);
         skinMid = Bitmap.createScaledBitmap(rawMid, size, size, true);
