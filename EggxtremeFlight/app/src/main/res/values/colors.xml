@@ -8,4 +8,7 @@
     <color name="panel_background">#FFFBF3E3</color>
     <color name="panel_border">#FF5A4636</color>
     <color name="retry_background">#FFEEDDB5</color>
+    <color name="skin_selected_fill">#FFFFE9A8</color>
+    <color name="skin_selected_border">#FFE0A100</color>
+    <color name="skin_button_selected_fill">#FFFFD54F</color>
 </resources>
