@@ -25,6 +25,8 @@ public final class Matchmaking {
         public final String skinId;
         public final int sampleIntervalMs;
         public final int worldWidth;
+        public final float scrollSpeed;
+        public final float spawnInterval;
         public final String uid;
         public final String nickname;
         public final boolean bot;
@@ -36,6 +38,12 @@ public final class Matchmaking {
 
         public Opponent(List<Double> trajectory, int score, String skinId, int sampleIntervalMs,
                         boolean bot, String uid, String nickname, List<Double> pipeTops, int worldWidth) {
+            this(trajectory, score, skinId, sampleIntervalMs, bot, uid, nickname, pipeTops, worldWidth, 0f, 0f);
+        }
+
+        public Opponent(List<Double> trajectory, int score, String skinId, int sampleIntervalMs,
+                        boolean bot, String uid, String nickname, List<Double> pipeTops, int worldWidth,
+                        float scrollSpeed, float spawnInterval) {
             List<Double> trajectoryCopy = trajectory == null ? new ArrayList<>() : new ArrayList<>(trajectory);
             List<Double> pipeCopy = pipeTops == null ? new ArrayList<>() : new ArrayList<>(pipeTops);
             this.trajectory = Collections.unmodifiableList(trajectoryCopy);
@@ -47,10 +55,13 @@ public final class Matchmaking {
             this.uid = uid;
             this.nickname = nickname;
             this.worldWidth = Math.max(worldWidth, 0);
+            this.scrollSpeed = scrollSpeed > 0f ? scrollSpeed : 0f;
+            this.spawnInterval = spawnInterval > 0f ? spawnInterval : 0f;
         }
 
         public Opponent withNickname(String nickname) {
-            return new Opponent(trajectory, score, skinId, sampleIntervalMs, bot, uid, nickname, pipeTops, worldWidth);
+            return new Opponent(trajectory, score, skinId, sampleIntervalMs, bot, uid, nickname,
+                    pipeTops, worldWidth, scrollSpeed, spawnInterval);
         }
     }
 
@@ -152,10 +163,16 @@ public final class Matchmaking {
 
     public static Opponent fromFields(int score, List<?> rawTrajectory, String skinId, Integer sampleIntervalMs,
                                       String uid, String nickname, List<?> rawPipeTops, Integer worldWidth) {
+        return fromFields(score, rawTrajectory, skinId, sampleIntervalMs, uid, nickname, rawPipeTops, worldWidth, 0f, 0f);
+    }
+
+    public static Opponent fromFields(int score, List<?> rawTrajectory, String skinId, Integer sampleIntervalMs,
+                                      String uid, String nickname, List<?> rawPipeTops, Integer worldWidth,
+                                      float scrollSpeed, float spawnInterval) {
         int interval = sampleIntervalMs == null ? BOT_SAMPLE_INTERVAL_MS : sampleIntervalMs;
         int width = worldWidth == null ? 0 : worldWidth;
         return new Opponent(readNumbers(rawTrajectory), score, skinId, interval, false,
-                uid, nickname, readNumbers(rawPipeTops), width);
+                uid, nickname, readNumbers(rawPipeTops), width, scrollSpeed, spawnInterval);
     }
 
     public static List<Double> gapsForTrajectory(List<Double> trajectory, int sampleIntervalMs,

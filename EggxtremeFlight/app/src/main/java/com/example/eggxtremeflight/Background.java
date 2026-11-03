@@ -10,7 +10,7 @@ public class Background {
     private float backgroundX1 = 0f;
     private float backgroundX2 = 0f;
     private int mapWidth;
-    private final float speed;
+    private float speed;
 
     public Background(Context context, int screenHeight, float speed) {
         this.speed = speed;
@@ -24,6 +24,10 @@ public class Background {
         scaledBitmap.recycle();
         mapWidth = gameMap.getWidth();
         backgroundX2 = mapWidth;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
     }
 
     public void update(float deltaTime){

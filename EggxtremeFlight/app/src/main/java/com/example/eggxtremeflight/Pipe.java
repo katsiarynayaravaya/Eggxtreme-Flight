@@ -58,6 +58,7 @@ public class Pipe {
     }
 
     public void draw(Canvas canvas){
+        float slop = capSlop();
         float finalTopCapY = topPipe - pipeTop.getHeight();
         float y = finalTopCapY;
         while(y > -pipeBody.getHeight()){
@@ -65,7 +66,7 @@ public class Pipe {
             canvas.drawBitmap(pipeBody, x, y, null);
 
         }
-        canvas.drawBitmap(pipeTop, x, finalTopCapY - 10f, null);
+        canvas.drawBitmap(pipeTop, x, finalTopCapY - slop, null);
 
         float bottomLimit = canvas.getHeight() - bottomPipe;
         y = bottomLimit + pipeBottom.getHeight();
@@ -73,7 +74,7 @@ public class Pipe {
             canvas.drawBitmap(pipeBody, x, y, null);
             y += pipeBody.getHeight();
         }
-        canvas.drawBitmap(pipeBottom, x, bottomLimit + 10f, null);
+        canvas.drawBitmap(pipeBottom, x, bottomLimit + slop, null);
     }
 
     public boolean isOutOfScreen(){
@@ -99,16 +100,22 @@ public class Pipe {
         RectF birdRect = new RectF(birdX, birdY, birdX + birdSize, birdY + birdSize);
 
         float pipeWidth = pipeTop.getWidth();
-        float tolerance = 30f;
+        float tolerance = Math.max(6f, pipeWidth * 0.1f);
+        float slop = capSlop();
 
         float hitboxLeft = x + tolerance;
         float hitboxRight = x + pipeWidth - tolerance;
-        float hitboxTopBottom = topPipe - 10f - tolerance;
-        float hitboxBottomTop = topPipe + gap + 10f + tolerance;
+        float hitboxTopBottom = topPipe - slop - tolerance;
+        float hitboxBottomTop = topPipe + gap + slop + tolerance;
 
         RectF topColumnRect = new RectF(hitboxLeft, 0, hitboxRight, hitboxTopBottom);
         RectF bottomColumnRect = new RectF(hitboxLeft, hitboxBottomTop, hitboxRight, 10000f);
 
         return RectF.intersects(birdRect, topColumnRect) || RectF.intersects(birdRect, bottomColumnRect);
+    }
+
+    private float capSlop() {
+        int cap = pipeTop == null ? 0 : pipeTop.getHeight();
+        return Math.max(4f, cap * 0.2f);
     }
 }

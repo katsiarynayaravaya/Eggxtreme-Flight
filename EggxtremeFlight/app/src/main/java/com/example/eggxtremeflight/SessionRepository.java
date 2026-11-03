@@ -37,6 +37,7 @@ public class SessionRepository {
     public void saveSession(FirebaseUser user, int score, String skinId,
                             List<Double> trajectory, int sampleIntervalMs,
                             List<Double> pipeTops, int worldWidth, String nickname,
+                            float scrollSpeed, float spawnInterval,
                             UserRepository.Callback<SaveResult> callback) {
         DocumentReference userRef = db.collection("users").document(user.getUid());
         DocumentReference sessionRef = db.collection("sessions").document(); // id создаётся автоматически
@@ -53,6 +54,8 @@ public class SessionRepository {
                     session.put("trajectory", trajectory);
                     session.put("pipeTops", pipeTops == null ? new ArrayList<>() : pipeTops);
                     session.put("worldWidth", worldWidth);
+                    session.put("scrollSpeed", scrollSpeed);
+                    session.put("spawnInterval", spawnInterval);
                     session.put("sampleIntervalMs", sampleIntervalMs);
                     if (nickname != null && !nickname.isEmpty()) {
                         session.put("nickname", nickname);
@@ -161,6 +164,12 @@ public class SessionRepository {
                 });
     }
 
+    private static float readFloat(DocumentSnapshot document, String key) {
+        Object value = document.get(key);
+        if (value instanceof Number) return ((Number) value).floatValue();
+        return 0f;
+    }
+
     private static void collect(List<Matchmaking.Opponent> out, QuerySnapshot snapshot) {
         for (DocumentSnapshot document : snapshot.getDocuments()) {
             Long score = document.getLong("score");
@@ -181,7 +190,9 @@ public class SessionRepository {
                     document.getString("uid"),
                     document.getString("nickname"),
                     pipeTops,
-                    worldWidth));
+                    worldWidth,
+                    readFloat(document, "scrollSpeed"),
+                    readFloat(document, "spawnInterval")));
         }
     }
 }

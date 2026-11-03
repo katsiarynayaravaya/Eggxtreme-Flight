@@ -36,11 +36,10 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
     private Bitmap pipeBody, pipeTop, pipeBottom;
     private final ArrayList<Pipe> pipes = new ArrayList<>();
     private float pipeSpawnTimer = 0f;
-    private final float pipeSpawnInterval = 2.5f;
+    private float pipeSpawnInterval = Course.LEGACY_SPAWN_INTERVAL;
     private Bird bird;
     private Background background;
-    private static final float BASE_SPEED = 200f;
-    private float playSpeed = BASE_SPEED;
+    private float playSpeed = Course.BASE_SPEED;
     private int score = 0;
     private Paint scorePaint;
     private Paint shadowHudPaint;
@@ -78,6 +77,14 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
         if (surfaceReady) {
             startLoop();
         }
+    }
+
+    public float getScrollSpeed() {
+        return playSpeed;
+    }
+
+    public float getSpawnInterval() {
+        return pipeSpawnInterval;
     }
 
     public int getOpponentScore() {
@@ -227,10 +234,30 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
     }
 
     private void prepareCourse() {
-        playSpeed = BASE_SPEED;
-        int width = getWidth();
-        if (opponent != null && opponent.worldWidth > 0 && width > 0) {
-            playSpeed = BASE_SPEED * width / (float) opponent.worldWidth;
+        int width = Math.max(getWidth(), 1);
+        int column = 1;
+        if (pipeTop != null) {
+            column = Math.max(1, pipeTop.getWidth());
+        } else if (bird != null) {
+            column = Math.max(1, (int) (bird.getSize() * 1.3f));
+        }
+        float recordedSpeed = Course.BASE_SPEED;
+        float recordedInterval = Course.LEGACY_SPAWN_INTERVAL;
+        int recordedWidth = width;
+        if (opponent != null && opponent.worldWidth > 0) {
+            recordedWidth = opponent.worldWidth;
+            if (opponent.scrollSpeed > 0f) recordedSpeed = opponent.scrollSpeed;
+            if (opponent.spawnInterval > 0f) recordedInterval = opponent.spawnInterval;
+            playSpeed = recordedSpeed * width / (float) recordedWidth;
+            pipeSpawnInterval = recordedInterval;
+        } else {
+            playSpeed = Course.scrollSpeed(width);
+            pipeSpawnInterval = Course.spawnInterval(width, column, playSpeed);
+            recordedSpeed = playSpeed;
+            recordedInterval = pipeSpawnInterval;
+        }
+        if (background != null) {
+            background.setSpeed(playSpeed);
         }
         if (opponent != null && !opponent.pipeTops.isEmpty()) {
             replayPipeTops = opponent.pipeTops;
@@ -238,9 +265,9 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
             replayPipeTops = Matchmaking.gapsForTrajectory(
                     opponent.trajectory,
                     opponent.sampleIntervalMs,
-                    opponent.worldWidth > 0 ? opponent.worldWidth : width,
-                    BASE_SPEED,
-                    pipeSpawnInterval);
+                    recordedWidth,
+                    recordedSpeed,
+                    recordedInterval);
         } else {
             replayPipeTops = Collections.emptyList();
         }
@@ -274,7 +301,7 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
     }
 
     private void initWorld() {
-        background = new Background(getContext(), getHeight(), BASE_SPEED);
+        background = new Background(getContext(), getHeight(), Course.BASE_SPEED);
         bird = new Bird(getContext(), getWidth(), getHeight());
 
         if (scorePaint == null) {

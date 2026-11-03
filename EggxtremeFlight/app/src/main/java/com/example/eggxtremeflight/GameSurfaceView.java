@@ -31,10 +31,10 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     private Bitmap pipeBody, pipeTop, pipeBottom;
     private final ArrayList<Pipe> pipes = new ArrayList<>();
     private float pipeSpawnTimer = 0f;
-    private final float pipeSpawnInterval = 2.5f;
+    private float pipeSpawnInterval = Course.LEGACY_SPAWN_INTERVAL;
     private Bird bird;
     private Background background;
-    private final float speed = 200f;
+    private float speed = Course.BASE_SPEED;
     private int score = 0;
     private Paint scorePaint;
     private final SurfaceHolder holder;
@@ -56,6 +56,14 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
 
     public void setOnGameOverListener(OnGameOverListener listener) {
         this.gameOverListener = listener;
+    }
+
+    public float getScrollSpeed() {
+        return speed;
+    }
+
+    public float getSpawnInterval() {
+        return pipeSpawnInterval;
     }
 
     @Override
@@ -184,8 +192,11 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        background = new Background(getContext(), getHeight(), speed);
         bird = new Bird(getContext(), getWidth(), getHeight());
+        int pipeWidth = (int) (bird.getSize() * 1.3f);
+        speed = Course.scrollSpeed(getWidth());
+        pipeSpawnInterval = Course.spawnInterval(getWidth(), pipeWidth, speed);
+        background = new Background(getContext(), getHeight(), speed);
 
         if (scorePaint == null) {
             scorePaint = new Paint();
@@ -199,8 +210,6 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
         }
 
         if (pipeBody == null) {
-            int pipeWidth = (int) (bird.getSize() * 1.3f);
-
             Bitmap rawBody = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_body);
             Bitmap rawTop = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_cap_top);
             Bitmap rawBottom = BitmapFactory.decodeResource(getResources(), R.drawable.pipe_cap_bottom);

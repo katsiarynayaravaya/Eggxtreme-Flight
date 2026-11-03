@@ -35,9 +35,13 @@ public final class ShadowPlayback {
     public double getNormalizedY() {
         if (samples.isEmpty()) return 0.5;
         if (finished) return samples.get(samples.size() - 1);
-        int index = (int) (elapsedMs / sampleIntervalMs);
+        float exact = elapsedMs / sampleIntervalMs;
+        int index = (int) exact;
         if (index < 0) index = 0;
-        if (index >= samples.size()) index = samples.size() - 1;
-        return samples.get(index);
+        if (index >= samples.size() - 1) return samples.get(samples.size() - 1);
+        float fraction = exact - index;
+        double from = samples.get(index);
+        double to = samples.get(index + 1);
+        return from + (to - from) * fraction;
     }
 }

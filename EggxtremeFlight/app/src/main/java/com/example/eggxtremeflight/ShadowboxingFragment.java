@@ -101,8 +101,10 @@ public class ShadowboxingFragment extends Fragment {
 
         Context context = getContext();
         String nickname = context == null ? null : UserRepository.getCachedNickname(context);
+        float scrollSpeed = binding == null ? 0f : binding.shadowGameView.getScrollSpeed();
+        float spawnInterval = binding == null ? 0f : binding.shadowGameView.getSpawnInterval();
         sessionRepository.saveSession(user, score, skinId, trajectory, sampleIntervalMs,
-                pipeTops, worldWidth, nickname,
+                pipeTops, worldWidth, nickname, scrollSpeed, spawnInterval,
                 new UserRepository.Callback<SessionRepository.SaveResult>() {
                     @Override
                     public void onSuccess(SessionRepository.SaveResult result) {

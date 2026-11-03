@@ -12,13 +12,13 @@ import static org.junit.Assert.assertTrue;
 public class ShadowPlaybackTest {
 
     @Test
-    public void staysOnSampleUntilIntervalElapses() {
+    public void interpolatesBetweenSamples() {
         ShadowPlayback playback = new ShadowPlayback(Arrays.asList(0.2, 0.4, 0.6), 100);
 
         playback.advance(0.05f);
 
         assertFalse(playback.isFinished());
-        assertEquals(0.2, playback.getNormalizedY(), 0.0001);
+        assertEquals(0.3, playback.getNormalizedY(), 0.0001);
     }
 
     @Test
