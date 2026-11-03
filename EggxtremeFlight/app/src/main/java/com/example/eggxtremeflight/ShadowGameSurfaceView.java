@@ -1,5 +1,6 @@
 package com.example.eggxtremeflight;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,7 +15,9 @@ import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Duel field for Shadowboxing. Single play keeps using {@link GameSurfaceView}.
@@ -22,7 +25,8 @@ import java.util.List;
 public class ShadowGameSurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
 
     public interface OnGameOverListener {
-        void onGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs);
+        void onGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs,
+                        List<Double> pipeTops, int worldWidth);
     }
 
     public static final int SAMPLE_INTERVAL_MS = 100;
@@ -35,15 +39,23 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
     private final float pipeSpawnInterval = 2.5f;
     private Bird bird;
     private Background background;
-    private final float speed = 200f;
+    private static final float BASE_SPEED = 200f;
+    private float playSpeed = BASE_SPEED;
     private int score = 0;
     private Paint scorePaint;
+    private Paint shadowHudPaint;
+    private String shadowHudName = "";
     private final SurfaceHolder holder;
     private Thread thread;
     private volatile boolean isRunning = false;
     private boolean surfaceReady = false;
 
     private final ArrayList<Double> trajectory = new ArrayList<>();
+    private final ArrayList<Double> pipeTops = new ArrayList<>();
+    private List<Double> replayPipeTops = Collections.emptyList();
+    private int replayPipeIndex = 0;
+    private Random continuationRandom = new Random();
+    private int worldWidth = 0;
     private float sampleTimer = 0f;
     private volatile boolean gameOver = false;
     private OnGameOverListener gameOverListener;
@@ -72,6 +84,13 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
         return opponent == null ? -1 : opponent.score;
     }
 
+    public String getOpponentName() {
+        if (opponent == null || opponent.bot || opponent.nickname == null || opponent.nickname.isEmpty()) {
+            return getContext().getString(R.string.shadow_bot_name);
+        }
+        return opponent.nickname;
+    }
+
     @Override
     public void run() {
         long lastTime = System.nanoTime();
@@ -96,8 +115,7 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
             pipeSpawnTimer += deltaTime;
             if (pipeSpawnTimer >= pipeSpawnInterval) {
                 pipeSpawnTimer = 0f;
-                int gapSize = bird.getSize() * 2;
-                pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
+                spawnPipe();
             }
             for (int i = pipes.size() - 1; i >= 0; i--) {
                 Pipe pipe = pipes.get(i);
@@ -137,6 +155,12 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
                     }
                     bird.draw(canvas);
                     canvas.drawText(String.valueOf(score), getWidth() / 2f, bird.getSize() * 1.5f, scorePaint);
+                    if (opponent != null && shadowHudPaint != null) {
+                        float hudX = bird.getSize() * 0.35f;
+                        float hudY = bird.getSize() * 0.9f;
+                        canvas.drawText(shadowHudName, hudX, hudY, shadowHudPaint);
+                        canvas.drawText(String.valueOf(opponent.score), hudX, hudY + shadowHudPaint.getTextSize() * 1.15f, shadowHudPaint);
+                    }
                     holder.unlockCanvasAndPost(canvas);
                 }
             }
@@ -162,8 +186,32 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
         final int finalScore = score;
         final String skinId = bird.getSkinId();
         final List<Double> trajectoryCopy = new ArrayList<>(trajectory);
+        final List<Double> pipeCopy = new ArrayList<>(pipeTops);
+        final int width = worldWidth;
         new Handler(Looper.getMainLooper()).post(() ->
-                listener.onGameOver(finalScore, skinId, trajectoryCopy, SAMPLE_INTERVAL_MS));
+                listener.onGameOver(finalScore, skinId, trajectoryCopy, SAMPLE_INTERVAL_MS, pipeCopy, width));
+    }
+
+    private void spawnPipe() {
+        int height = getHeight();
+        int gapSize = bird.getSize() * 2;
+        Pipe pipe;
+        if (replayPipeIndex < replayPipeTops.size()) {
+            float top = (float) (replayPipeTops.get(replayPipeIndex) * height);
+            float minTop = height / 6f;
+            float maxTop = height - gapSize - minTop;
+            if (maxTop < minTop) maxTop = minTop;
+            top = Math.max(minTop, Math.min(maxTop, top));
+            float bottom = height - gapSize - top;
+            pipe = new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, height, getWidth(), playSpeed, top, bottom);
+            replayPipeIndex++;
+        } else {
+            pipe = new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, height, getWidth(), playSpeed, continuationRandom);
+        }
+        pipes.add(pipe);
+        if (height > 0) {
+            pipeTops.add(Math.round(pipe.getTopPipe() * 1000.0 / height) / 1000.0);
+        }
     }
 
     private void resetGame() {
@@ -173,13 +221,50 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
         gameOver = false;
         sampleTimer = 0f;
         trajectory.clear();
+        pipeTops.clear();
+        worldWidth = getWidth();
         recordSample();
+    }
+
+    private void prepareCourse() {
+        playSpeed = BASE_SPEED;
+        int width = getWidth();
+        if (opponent != null && opponent.worldWidth > 0 && width > 0) {
+            playSpeed = BASE_SPEED * width / (float) opponent.worldWidth;
+        }
+        if (opponent != null && !opponent.pipeTops.isEmpty()) {
+            replayPipeTops = opponent.pipeTops;
+        } else if (opponent != null) {
+            replayPipeTops = Matchmaking.gapsForTrajectory(
+                    opponent.trajectory,
+                    opponent.sampleIntervalMs,
+                    opponent.worldWidth > 0 ? opponent.worldWidth : width,
+                    BASE_SPEED,
+                    pipeSpawnInterval);
+        } else {
+            replayPipeTops = Collections.emptyList();
+        }
+        replayPipeIndex = 0;
+        continuationRandom = new Random(courseSeed(opponent));
+    }
+
+    private static long courseSeed(Matchmaking.Opponent opponent) {
+        if (opponent == null) return 1L;
+        long seed = 17L;
+        seed = seed * 31 + opponent.score;
+        seed = seed * 31 + opponent.trajectory.size();
+        seed = seed * 31 + opponent.pipeTops.size();
+        if (opponent.uid != null) seed = seed * 31 + opponent.uid.hashCode();
+        if (opponent.nickname != null) seed = seed * 31 + opponent.nickname.hashCode();
+        return seed;
     }
 
     private void startLoop() {
         if (thread != null && thread.isAlive()) return;
+        prepareCourse();
         if (opponent != null) {
-            shadowBird = new ShadowBird(getContext(), getWidth(), getHeight(), opponent);
+            shadowHudName = getOpponentName();
+            shadowBird = new ShadowBird(getContext(), getWidth(), getHeight(), opponent, shadowHudName);
             shadowBird.start();
         }
         resetGame();
@@ -189,7 +274,7 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
     }
 
     private void initWorld() {
-        background = new Background(getContext(), getHeight(), speed);
+        background = new Background(getContext(), getHeight(), BASE_SPEED);
         bird = new Bird(getContext(), getWidth(), getHeight());
 
         if (scorePaint == null) {
@@ -201,6 +286,13 @@ public class ShadowGameSurfaceView extends SurfaceView implements Runnable, Surf
             scorePaint.setAntiAlias(true);
             scorePaint.setFakeBoldText(true);
             scorePaint.setTextAlign(Paint.Align.CENTER);
+
+            shadowHudPaint = new Paint(scorePaint);
+            shadowHudPaint.setTextAlign(Paint.Align.LEFT);
+            shadowHudPaint.setTextSize(bird.getSize() * 0.42f);
+            shadowHudPaint.setColor(android.graphics.Color.WHITE);
+            shadowHudPaint.setAlpha(190);
+            shadowHudPaint.setShadowLayer(6f, 0f, 2f, android.graphics.Color.BLACK);
         }
 
         if (pipeBody == null) {

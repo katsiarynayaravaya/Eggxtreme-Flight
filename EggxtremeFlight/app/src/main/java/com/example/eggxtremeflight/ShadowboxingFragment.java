@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.List;
 
 public class ShadowboxingFragment extends Fragment {
+    public static final String ARG_SAME_OPPONENT = "sameOpponent";
     private static final String TAG = "ShadowMatch";
 
     private FragmentShadowboxingBinding binding;
@@ -48,42 +49,60 @@ public class ShadowboxingFragment extends Fragment {
 
         binding.shadowGameView.setOnGameOverListener(this::handleGameOver);
 
+        Bundle args = getArguments();
+        boolean sameOpponent = args != null && args.getBoolean(ARG_SAME_OPPONENT, false);
+        Matchmaking.Opponent remembered = ShadowChallenge.current();
+        if (sameOpponent && remembered != null) {
+            showOpponent(remembered);
+            return;
+        }
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        sessionRepository.findOpponent(user, new UserRepository.Callback<Matchmaking.Opponent>() {
+        sessionRepository.findOpponent(user, remembered, new UserRepository.Callback<Matchmaking.Opponent>() {
             @Override
             public void onSuccess(Matchmaking.Opponent opponent) {
-                if (!isAdded() || binding == null) return;
-                binding.shadowLoading.setVisibility(View.GONE);
-                binding.shadowGameView.setOpponent(opponent);
+                showOpponent(opponent);
             }
 
             @Override
             public void onError(Exception e) {
                 Log.e(TAG, "opponent search failed", e);
-                if (!isAdded() || binding == null) return;
-                binding.shadowLoading.setVisibility(View.GONE);
-                binding.shadowGameView.setOpponent(Matchmaking.defaultBot());
+                showOpponent(Matchmaking.defaultBot());
             }
         });
     }
 
-    private void handleGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs) {
+    private void showOpponent(Matchmaking.Opponent opponent) {
+        if (!isAdded() || binding == null) return;
+        Matchmaking.Opponent ready = opponent == null ? Matchmaking.defaultBot() : opponent;
+        ShadowChallenge.remember(ready);
+        binding.shadowLoading.setVisibility(View.GONE);
+        binding.shadowGameView.setOpponent(ready);
+    }
+
+    private void handleGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs,
+                                 List<Double> pipeTops, int worldWidth) {
         int shadowScore = binding == null ? -1 : binding.shadowGameView.getOpponentScore();
+        String shadowName = binding == null ? null : binding.shadowGameView.getOpponentName();
         View root = binding == null ? null : binding.getRoot();
         Log.d(TAG, "Game over: score=" + score + ", skin=" + skinId
                 + ", samples=" + trajectory.size()
+                + ", pipes=" + pipeTops.size()
                 + ", shadow=" + shadowScore);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             showToast(R.string.session_not_signed_in);
             if (root != null) {
-                GameOverFragment.open(root, score, shadowScore, true);
+                GameOverFragment.open(root, score, shadowScore, true, shadowName);
             }
             return;
         }
 
+        Context context = getContext();
+        String nickname = context == null ? null : UserRepository.getCachedNickname(context);
         sessionRepository.saveSession(user, score, skinId, trajectory, sampleIntervalMs,
+                pipeTops, worldWidth, nickname,
                 new UserRepository.Callback<SessionRepository.SaveResult>() {
                     @Override
                     public void onSuccess(SessionRepository.SaveResult result) {
@@ -104,7 +123,7 @@ public class ShadowboxingFragment extends Fragment {
                     }
                 });
         if (root != null) {
-            GameOverFragment.open(root, score, shadowScore, true);
+            GameOverFragment.open(root, score, shadowScore, true, shadowName);
         }
     }
 

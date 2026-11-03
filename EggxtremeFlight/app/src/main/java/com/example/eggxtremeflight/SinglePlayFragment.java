@@ -49,21 +49,26 @@ public class SinglePlayFragment extends Fragment {
         binding.gameSurfaceView.setOnGameOverListener(this::handleGameOver);
     }
 
-    private void handleGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs) {
+    private void handleGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs,
+                                 List<Double> pipeTops, int worldWidth) {
         Log.d(TAG, "Game over: score=" + score + ", skin=" + skinId
-                + ", samples=" + trajectory.size());
+                + ", samples=" + trajectory.size()
+                + ", pipes=" + pipeTops.size());
 
         View root = binding == null ? null : binding.getRoot();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             showToast(R.string.session_not_signed_in);
             if (root != null) {
-                GameOverFragment.open(root, score, -1, false);
+                GameOverFragment.open(root, score, -1, false, null);
             }
             return;
         }
 
+        Context context = getContext();
+        String nickname = context == null ? null : UserRepository.getCachedNickname(context);
         sessionRepository.saveSession(user, score, skinId, trajectory, sampleIntervalMs,
+                pipeTops, worldWidth, nickname,
                 new UserRepository.Callback<SessionRepository.SaveResult>() {
                     @Override
                     public void onSuccess(SessionRepository.SaveResult result) {
@@ -84,7 +89,7 @@ public class SinglePlayFragment extends Fragment {
                     }
                 });
         if (root != null) {
-            GameOverFragment.open(root, score, -1, false);
+            GameOverFragment.open(root, score, -1, false, null);
         }
     }
 

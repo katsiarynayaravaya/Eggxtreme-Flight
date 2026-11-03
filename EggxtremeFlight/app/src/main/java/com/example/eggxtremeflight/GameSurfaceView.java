@@ -20,7 +20,8 @@ import java.util.List;
 public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
 
     public interface OnGameOverListener {
-        void onGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs);
+        void onGameOver(int score, String skinId, List<Double> trajectory, int sampleIntervalMs,
+                        List<Double> pipeTops, int worldWidth);
     }
 
     public static final int SAMPLE_INTERVAL_MS = 100;
@@ -41,6 +42,8 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
     private volatile boolean isRunning = false;
 
     private final ArrayList<Double> trajectory = new ArrayList<>();
+    private final ArrayList<Double> pipeTops = new ArrayList<>();
+    private int worldWidth = 0;
     private float sampleTimer = 0f;
     private volatile boolean gameOver = false;
     private OnGameOverListener gameOverListener;
@@ -76,8 +79,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
             pipeSpawnTimer += deltaTime;
             if (pipeSpawnTimer >= pipeSpawnInterval) {
                 pipeSpawnTimer = 0f;
-                int gapSize = bird.getSize() * 2;
-                pipes.add(new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, getHeight(), getWidth(), speed));
+                spawnPipe();
             }
             for (int i=pipes.size()- 1; i>=0; i--){
                 Pipe pipe = pipes.get(i);
@@ -139,8 +141,20 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
         final int finalScore = score;
         final String skinId = bird.getSkinId();
         final List<Double> trajectoryCopy = new ArrayList<>(trajectory);
+        final List<Double> pipeCopy = new ArrayList<>(pipeTops);
+        final int width = worldWidth;
         new Handler(Looper.getMainLooper()).post(() ->
-                listener.onGameOver(finalScore, skinId, trajectoryCopy, SAMPLE_INTERVAL_MS));
+                listener.onGameOver(finalScore, skinId, trajectoryCopy, SAMPLE_INTERVAL_MS, pipeCopy, width));
+    }
+
+    private void spawnPipe() {
+        int height = getHeight();
+        int gapSize = bird.getSize() * 2;
+        Pipe pipe = new Pipe(pipeBody, pipeTop, pipeBottom, gapSize, height, getWidth(), speed);
+        pipes.add(pipe);
+        if (height > 0) {
+            pipeTops.add(Math.round(pipe.getTopPipe() * 1000.0 / height) / 1000.0);
+        }
     }
 
     private void resetGame() {
@@ -150,6 +164,8 @@ public class GameSurfaceView extends SurfaceView implements Runnable, SurfaceHol
         gameOver = false;
         sampleTimer = 0f;
         trajectory.clear();
+        pipeTops.clear();
+        worldWidth = getWidth();
         recordSample();
     }
 

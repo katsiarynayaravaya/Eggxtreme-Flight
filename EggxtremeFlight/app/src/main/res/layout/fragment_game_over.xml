@@ -44,6 +44,17 @@
         app:layout_constraintTop_toBottomOf="@id/gameOverTitle"
         app:layout_constraintWidth_max="420dp">
 
+        <TextView
+            android:id="@+id/shadowOpponentName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="@font/game_font"
+            android:gravity="center"
+            android:textColor="@color/leader_text"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -124,10 +135,30 @@
         android:textColor="@color/leader_text"
         android:textSize="26sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/menuButton"
+        app:layout_constraintBottom_toTopOf="@id/newGameButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scorePanel"
+        app:layout_constraintWidth_max="320dp" />
+
+    <TextView
+        android:id="@+id/newGameButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/button_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/game_font"
+        android:gravity="center"
+        android:text="@string/new_game_btn"
+        android:textColor="@color/leader_text"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/menuButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rematchButton"
         app:layout_constraintWidth_max="320dp" />
 
     <TextView
@@ -147,7 +178,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rematchButton"
+        app:layout_constraintTop_toBottomOf="@id/newGameButton"
         app:layout_constraintWidth_max="320dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

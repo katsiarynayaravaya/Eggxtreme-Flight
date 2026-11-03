@@ -20,6 +20,10 @@ public class Pipe {
     private boolean isPassed = false;
 
     public Pipe (Bitmap body, Bitmap top, Bitmap bottom, int gap, int screenHeight, int screenWidth, float speed){
+        this(body, top, bottom, gap, screenHeight, screenWidth, speed, new Random());
+    }
+
+    public Pipe (Bitmap body, Bitmap top, Bitmap bottom, int gap, int screenHeight, int screenWidth, float speed, Random random){
         pipeBody = body;
         pipeTop = top;
         pipeBottom = bottom;
@@ -30,8 +34,8 @@ public class Pipe {
         x = screenWidth;
         this.speed = speed;
 
-        Random random = new Random();
-        topPipe = minHeight + random.nextInt(maxHeight - minHeight);
+        int span = Math.max(1, maxHeight - minHeight);
+        topPipe = minHeight + random.nextInt(span);
         bottomPipe = screenHeight - gap - topPipe;
     }
 
@@ -78,6 +82,10 @@ public class Pipe {
 
     public float getX(){
         return x + pipeTop.getWidth();
+    }
+
+    public int getTopPipe() {
+        return topPipe;
     }
 
     public boolean isPassed() {

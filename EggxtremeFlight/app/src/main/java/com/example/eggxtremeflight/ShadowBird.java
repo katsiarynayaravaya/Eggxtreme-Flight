@@ -4,7 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+
+import androidx.core.content.res.ResourcesCompat;
 
 public class ShadowBird {
     private static final int SHADOW_ALPHA = 128;
@@ -15,18 +18,21 @@ public class ShadowBird {
     private final int screenHeight;
     private final ShadowPlayback playback;
     private final Paint paint;
+    private final Paint namePaint;
+    private final String name;
     private float birdX;
     private float birdY;
     private float fallVelocity;
     private boolean falling;
     private boolean hidden;
 
-    public ShadowBird(Context context, int screenWidth, int screenHeight, Matchmaking.Opponent opponent) {
+    public ShadowBird(Context context, int screenWidth, int screenHeight, Matchmaking.Opponent opponent, String name) {
         this.screenHeight = screenHeight;
         this.size = Math.max(1, screenHeight / 12);
         this.playback = new ShadowPlayback(opponent.trajectory, opponent.sampleIntervalMs);
-        this.birdX = Math.max(0f, screenWidth / 4f - size * 0.75f);
+        this.birdX = screenWidth / 4f;
         this.birdY = screenHeight / 2f;
+        this.name = name == null ? "" : name;
 
         SkinItem skinItem = SkinCatalog.findById(opponent.skinId);
         Bitmap raw = BitmapFactory.decodeResource(context.getResources(), skinItem.midRes);
@@ -38,6 +44,14 @@ public class ShadowBird {
 
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setAlpha(SHADOW_ALPHA);
+
+        namePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        namePaint.setColor(Color.WHITE);
+        namePaint.setAlpha(170);
+        namePaint.setTextAlign(Paint.Align.CENTER);
+        namePaint.setTextSize(size * 0.42f);
+        namePaint.setTypeface(ResourcesCompat.getFont(context, R.font.game_font));
+        namePaint.setShadowLayer(6f, 0f, 2f, Color.BLACK);
     }
 
     public void start() {
@@ -66,6 +80,10 @@ public class ShadowBird {
 
     public void draw(Canvas canvas) {
         if (hidden || skin == null) return;
+        if (!name.isEmpty()) {
+            float textY = Math.max(namePaint.getTextSize(), birdY - size * 0.15f);
+            canvas.drawText(name, birdX + size / 2f, textY, namePaint);
+        }
         canvas.drawBitmap(skin, birdX, birdY, paint);
     }
 }

@@ -35,9 +35,12 @@
     <string name="game_over_title">Игра окончена</string>
     <string name="your_score">Ваш счёт</string>
     <string name="shadow_score">Счёт Тени</string>
+    <string name="shadow_name">Тень: %1$s</string>
+    <string name="shadow_bot_name">Бот</string>
     <string name="shadow_win">Победа над Тенью!</string>
     <string name="shadow_lose">Тень оказалась быстрее</string>
     <string name="shadow_draw">Ничья</string>
     <string name="rematch_btn">Реванш</string>
+    <string name="new_game_btn">Новая игра</string>
     <string name="main_menu_btn">В главное меню</string>
 </resources>
